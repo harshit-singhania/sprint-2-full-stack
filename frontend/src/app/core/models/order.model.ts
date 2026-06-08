@@ -1,16 +1,32 @@
 import { Car } from './car.model';
 
+export interface OrderUser {
+  id: number;
+  username: string;
+  name: string;
+  phoneNumber: string;
+  email: string;
+  role: string;
+}
+
+export interface OrderPayment {
+  id: string;
+  status: 'SUCCESS' | 'FAILED';
+  amount: number;
+  method: string;
+  gatewayName: string;
+  gatewayTransactionId: string;
+  failureReason: string | null;
+  paidAt: string;
+}
+
 export interface Order {
   id: number;
   car: Car;
-  buyer: { id: number; fullName: string; username: string; phoneNumber: string };
-  seller: { id: number; fullName: string; username: string; phoneNumber: string };
+  buyer: OrderUser;
+  seller: OrderUser;
+  payment: OrderPayment;
   status: 'PENDING_ADMIN_APPROVAL' | 'PENDING_SELLER_APPROVAL' | 'APPROVED' | 'REJECTED' | 'CANCELLED';
-  paymentStatus: 'SUCCESS' | 'FAILED';
-  paymentMethod: string;
-  paymentToken: string;
-  amount: number;
   fraudAlert: boolean;
   createdAt: string;
-  updatedAt: string;
 }

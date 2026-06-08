@@ -57,11 +57,17 @@ export class MyListingsComponent implements OnInit {
   get approvedCars() { return this.cars.filter(c => c.approvalStatus === 'APPROVED'); }
   get rejectedCars() { return this.cars.filter(c => c.approvalStatus === 'REJECTED'); }
 
+  private statusOrder(car: Car): number {
+    if (car.approvalStatus === 'PENDING_ADMIN_APPROVAL') return 0;
+    if (car.approvalStatus === 'REJECTED') return 2;
+    return 1;
+  }
+
   get filteredCars() {
     if (this.activeFilter === 'pending') return this.pendingCars;
     if (this.activeFilter === 'approved') return this.approvedCars;
     if (this.activeFilter === 'rejected') return this.rejectedCars;
-    return this.cars;
+    return [...this.cars].sort((a, b) => this.statusOrder(a) - this.statusOrder(b));
   }
 
   setFilter(filter: 'all' | 'pending' | 'approved' | 'rejected') {

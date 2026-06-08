@@ -14,7 +14,6 @@ import { ToastService } from '../../../shared/components/toast/toast.service';
       <div class="form-shell">
         <div class="form-top">
           <h2 class="h2">List your car</h2>
-          <p class="body">Add the essentials first. Photos coming soon.</p>
         </div>
 
         <form [formGroup]="form" (ngSubmit)="onSubmit()" novalidate>
@@ -88,14 +87,6 @@ import { ToastService } from '../../../shared/components/toast/toast.service';
               <textarea class="field-input field-textarea" rows="5" formControlName="description"></textarea>
               <span class="field-note mono">{{ descriptionLength }} characters</span>
             </label>
-          </section>
-
-          <section class="upload-zone" aria-disabled="true">
-            <div>
-              <i class="ph ph-upload-simple"></i>
-              <div class="h3">Drag photos or browse</div>
-              <p class="field-note">Photos coming soon.</p>
-            </div>
           </section>
 
           <div class="sticky-actions">
@@ -192,18 +183,6 @@ import { ToastService } from '../../../shared/components/toast/toast.service';
       transition: left 180ms ease;
     }
     .toggle--on .toggle-thumb { left: 28px; }
-    .upload-zone {
-      border: 1px dashed var(--hairline);
-      border-radius: var(--radius-card);
-      padding: 22px;
-      margin-bottom: 16px;
-      color: var(--text-secondary);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      text-align: center;
-    }
-    .upload-zone i { font-size: 24px; color: var(--text-tertiary); }
     .sticky-actions {
       position: sticky;
       bottom: 0;

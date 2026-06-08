@@ -10,7 +10,7 @@ export class FeedbackService {
 
   constructor(private http: HttpClient) {}
 
-  submitFeedback(data: { rating: number; comment?: string }): Observable<any> {
+  submitFeedback(data: { message: string }): Observable<any> {
     return this.http.post(`${this.base}/api/feedback`, data).pipe(catchError(e => throwError(() => e)));
   }
 }

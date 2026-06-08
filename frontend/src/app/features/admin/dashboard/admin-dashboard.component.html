@@ -102,7 +102,7 @@
                 <div class="queue-title h3">{{ car.make }} {{ car.model }} {{ car.year }}</div>
                 <div class="queue-meta">
                   <span class="mono">{{ car.price | inrCurrency }}</span>
-                  <span class="mono">{{ car.seller.fullName }}</span>
+                  <span class="mono">{{ car.seller.name }}</span>
                 </div>
               </div>
 
@@ -136,12 +136,12 @@
                 <div class="queue-title h3">Order #{{ order.id }}</div>
                 <div class="queue-meta">
                   <span class="mono">{{ order.car.make }} {{ order.car.model }}</span>
-                  <span class="mono">{{ order.amount | inrCurrency }}</span>
+                  <span class="mono">{{ (order.payment?.amount ?? 0) | inrCurrency }}</span>
                 </div>
                 <div class="queue-meta queue-meta--secondary">
-                  <span class="mono">{{ order.buyer.fullName }}</span>
-                  <span class="mono">{{ order.seller.fullName }}</span>
-                  <app-status-chip [status]="order.paymentStatus"></app-status-chip>
+                  <span class="mono">{{ order.buyer.name }}</span>
+                  <span class="mono">{{ order.seller.name }}</span>
+                  <app-status-chip [status]="order.payment?.status ?? ''"></app-status-chip>
                 </div>
                 <div class="fraud-badge" *ngIf="order.fraudAlert">
                   <i class="ph ph-warning-circle" aria-hidden="true"></i>

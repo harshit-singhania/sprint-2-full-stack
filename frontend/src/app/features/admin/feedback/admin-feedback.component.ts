@@ -48,36 +48,20 @@ import { EmptyStateComponent } from '../../../shared/components/empty-state/empt
             *ngIf="feedbacks.length === 0"
             icon="ph ph-star"
             title="No feedback yet"
-            message="Ratings and comments will appear here once customers start sharing them."
+            message="Feedback from users will appear here."
           ></app-empty-state>
 
           <ng-container *ngIf="feedbacks.length > 0">
-            <section class="summary surface-card">
-              <div>
-                <div class="summary-value mono">{{ averageRating }}</div>
-                <div class="summary-label">Average rating</div>
-              </div>
-              <div class="summary-copy">
-                <div class="summary-stars" aria-hidden="true">
-                  <i *ngFor="let star of starState" [class]="star ? 'ph ph-star-fill' : 'ph ph-star'"></i>
-                </div>
-                <div class="summary-count mono">{{ feedbacks.length }} reviews</div>
-              </div>
-            </section>
-
             <div class="feedback-grid">
               <article class="feedback-card surface-card" *ngFor="let feedback of feedbacks">
                 <div class="feedback-card__head">
-                  <div class="feedback-rating" aria-hidden="true">
-                    <i *ngFor="let star of getStars(feedback.rating)" [class]="star ? 'ph ph-star-fill' : 'ph ph-star'"></i>
-                  </div>
                   <span class="feedback-date mono">{{ feedback.createdAt | date:'dd MMM yyyy' }}</span>
                 </div>
 
-                <p class="feedback-comment">{{ feedback.comment || 'No comment provided.' }}</p>
+                <p class="feedback-comment">{{ feedback.message }}</p>
 
                 <div class="feedback-author mono">
-                  {{ feedback.createdBy.fullName }}
+                  {{ feedback.user.name }}
                 </div>
               </article>
             </div>
@@ -226,20 +210,5 @@ export class AdminFeedbackComponent implements OnInit {
         this.isLoading = false;
       }
     });
-  }
-
-  get averageRating(): string {
-    if (this.feedbacks.length === 0) return '0.0';
-    const total = this.feedbacks.reduce((sum, feedback) => sum + feedback.rating, 0);
-    return (total / this.feedbacks.length).toFixed(1);
-  }
-
-  get starState(): boolean[] {
-    const rating = Math.round(Number(this.averageRating));
-    return [1, 2, 3, 4, 5].map(index => index <= rating);
-  }
-
-  getStars(rating: number): boolean[] {
-    return [1, 2, 3, 4, 5].map(index => index <= rating);
   }
 }

@@ -51,7 +51,9 @@ import { getCarPrimaryImage } from '../../../core/utils/car-images';
   styles: [`
     /* Root: anchor, entire card is a link */
     .car-card {
-      display: block;
+      display: flex;
+      flex-direction: column;
+      height: 100%;
       text-decoration: none;
       color: inherit;
       overflow: hidden;
@@ -126,6 +128,7 @@ import { getCarPrimaryImage } from '../../../core/utils/car-images';
       display: flex;
       flex-direction: column;
       gap: 6px;
+      flex: 1;
     }
 
     .car-card__title {

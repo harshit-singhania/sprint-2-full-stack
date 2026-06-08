@@ -393,7 +393,9 @@
   scroll-snap-type: x mandatory;
 
   app-car-card {
+    width: 260px;
     min-width: 260px;
+    max-width: 260px;
     flex-shrink: 0;
     scroll-snap-align: start;
   }
@@ -407,7 +409,12 @@
 .car-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  grid-auto-rows: 1fr;
   gap: 24px;
+
+  app-car-card, app-car-card > * {
+    height: 100%;
+  }
 }
 
 /* Trust strip */

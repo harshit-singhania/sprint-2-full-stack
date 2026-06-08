@@ -72,8 +72,8 @@ import { EmptyStateComponent } from '../../../shared/components/empty-state/empt
                 <tr *ngFor="let user of filteredUsers">
                   <td>
                     <div class="user-name">
-                      <span class="avatar mono">{{ getInitials(user.fullName) }}</span>
-                      <span>{{ user.fullName }}</span>
+                      <span class="avatar mono">{{ getInitials(user.name) }}</span>
+                      <span>{{ user.name }}</span>
                     </div>
                   </td>
                   <td class="mono">{{ user.username }}</td>
@@ -253,14 +253,14 @@ export class AdminUsersComponent implements OnInit {
   applyFilter() {
     const term = this.searchTerm.trim().toLowerCase();
     this.filteredUsers = this.allUsers.filter((user) =>
-      [user.fullName, user.username, user.email, user.phoneNumber]
+      [user.name, user.username, user.email, user.phoneNumber]
         .filter(Boolean)
         .some(value => value!.toLowerCase().includes(term))
     );
   }
 
-  getInitials(fullName: string): string {
-    return (fullName || '')
+  getInitials(name: string): string {
+    return (name || '')
       .split(/\s+/)
       .filter(Boolean)
       .map(part => part[0] ?? '')

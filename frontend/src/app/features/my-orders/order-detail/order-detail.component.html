@@ -77,7 +77,7 @@
           </div>
           <div class="panel-row">
             <span class="panel-label">Price</span>
-            <span class="mono">{{ order.amount | inrCurrency }}</span>
+            <span class="mono">{{ (order.payment?.amount ?? order.car?.price ?? 0) | inrCurrency }}</span>
           </div>
         </div>
 
@@ -91,7 +91,7 @@
             </div>
             <div class="panel-row">
               <span class="panel-label">Name</span>
-              <span>{{ order.buyer?.fullName }}</span>
+              <span>{{ order.buyer?.name || order.buyer?.username }}</span>
             </div>
             <div class="panel-row">
               <span class="panel-label">Phone</span>
@@ -106,7 +106,7 @@
             </div>
             <div class="panel-row">
               <span class="panel-label">Name</span>
-              <span>{{ order.seller?.fullName }}</span>
+              <span>{{ order.seller?.name || order.seller?.username }}</span>
             </div>
             <div class="panel-row">
               <span class="panel-label">Phone</span>
@@ -125,19 +125,19 @@
           </h3>
           <div class="panel-row">
             <span class="panel-label">Amount</span>
-            <span class="mono">{{ order.amount | inrCurrency }}</span>
+            <span class="mono">{{ (order.payment?.amount ?? 0) | inrCurrency }}</span>
           </div>
           <div class="panel-row">
             <span class="panel-label">Method</span>
-            <span>{{ order.paymentMethod }}</span>
+            <span>{{ order.payment?.method }}</span>
           </div>
           <div class="panel-row">
             <span class="panel-label">Status</span>
-            <app-status-chip [status]="order.paymentStatus"></app-status-chip>
+            <app-status-chip [status]="order.payment?.status ?? ''"></app-status-chip>
           </div>
-          <div class="panel-row" *ngIf="order.paymentToken">
-            <span class="panel-label">Token</span>
-            <span class="mono token">{{ maskToken(order.paymentToken) }}</span>
+          <div class="panel-row" *ngIf="order.payment?.gatewayTransactionId">
+            <span class="panel-label">Transaction ID</span>
+            <span class="mono token">{{ order.payment?.gatewayTransactionId }}</span>
           </div>
         </div>
 

@@ -9,7 +9,7 @@ export interface Car {
   description?: string;
   available: boolean;
   approvalStatus: 'PENDING_ADMIN_APPROVAL' | 'APPROVED' | 'REJECTED';
-  seller: { id: number; fullName: string; username: string; phoneNumber: string };
+  seller: { id: number; name: string; username: string; phoneNumber: string };
   viewCount: number;
   createdAt: string;
 }

@@ -37,9 +37,9 @@
           </div>
           <div class="order-chips">
             <app-status-chip [status]="order.status"></app-status-chip>
-            <app-status-chip [status]="order.paymentStatus"></app-status-chip>
+            <app-status-chip [status]="order.payment?.status ?? ''"></app-status-chip>
           </div>
-          <div class="order-amount mono">{{ order.amount | inrCurrency }}</div>
+          <div class="order-amount mono">{{ (order.payment?.amount ?? 0) | inrCurrency }}</div>
           <i class="ph ph-caret-right order-caret"></i>
         </a>
       </div>

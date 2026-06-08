@@ -65,12 +65,12 @@ import { InrCurrencyPipe } from '../../../core/pipes/inr-currency.pipe';
                 <div class="queue-title h3">Order #{{ order.id }}</div>
                 <div class="queue-meta">
                   <span class="mono">{{ order.car.make }} {{ order.car.model }}</span>
-                  <span class="mono">{{ order.amount | inrCurrency }}</span>
+                  <span class="mono">{{ (order.payment?.amount ?? 0) | inrCurrency }}</span>
                 </div>
                 <div class="queue-meta queue-meta--secondary">
-                  <span class="mono">{{ order.buyer.fullName }}</span>
-                  <span class="mono">{{ order.seller.fullName }}</span>
-                  <app-status-chip [status]="order.paymentStatus"></app-status-chip>
+                  <span class="mono">{{ order.buyer.name }}</span>
+                  <span class="mono">{{ order.seller.name }}</span>
+                  <app-status-chip [status]="order.payment?.status ?? ''"></app-status-chip>
                 </div>
                 <div class="fraud-badge" *ngIf="order.fraudAlert">
                   <i class="ph ph-warning-circle" aria-hidden="true"></i>
@@ -87,21 +87,21 @@ import { InrCurrencyPipe } from '../../../core/pipes/inr-currency.pipe';
                 <div class="queue-preview__grid">
                   <div>
                     <div class="eyebrow mono">Buyer</div>
-                    <div class="queue-preview__value mono">{{ order.buyer.fullName }}</div>
+                    <div class="queue-preview__value mono">{{ order.buyer.name }}</div>
                     <div class="queue-preview__sub mono">{{ order.buyer.phoneNumber }}</div>
                   </div>
                   <div>
                     <div class="eyebrow mono">Seller</div>
-                    <div class="queue-preview__value mono">{{ order.seller.fullName }}</div>
+                    <div class="queue-preview__value mono">{{ order.seller.name }}</div>
                     <div class="queue-preview__sub mono">{{ order.seller.phoneNumber }}</div>
                   </div>
                   <div>
                     <div class="eyebrow mono">Payment method</div>
-                    <div class="queue-preview__value">{{ order.paymentMethod }}</div>
+                    <div class="queue-preview__value">{{ order.payment?.method }}</div>
                   </div>
                   <div>
-                    <div class="eyebrow mono">Payment token</div>
-                    <div class="queue-preview__value mono">{{ maskToken(order.paymentToken) }}</div>
+                    <div class="eyebrow mono">Transaction ID</div>
+                    <div class="queue-preview__value mono">{{ maskToken(order.payment?.gatewayTransactionId) }}</div>
                   </div>
                   <div>
                     <div class="eyebrow mono">Listed car</div>
@@ -335,7 +335,7 @@ export class AdminPendingOrdersComponent implements OnInit {
     });
   }
 
-  maskToken(value: string): string {
+  maskToken(value: string | undefined): string {
     if (!value) return 'Hidden';
     return value.length <= 6 ? 'Hidden' : `${value.slice(0, 4)}...${value.slice(-4)}`;
   }

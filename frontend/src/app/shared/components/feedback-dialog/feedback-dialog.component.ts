@@ -22,32 +22,16 @@ import { ToastService } from '../toast/toast.service';
       <div class="feedback-dialog__title h3">Share Your Feedback</div>
 
       <form [formGroup]="form" class="feedback-form">
-        <!-- Phosphor star rating -->
-        <div class="star-rating">
-          <button
-            type="button"
-            *ngFor="let star of [1,2,3,4,5]"
-            class="star-btn"
-            (click)="setRating(star)"
-            [attr.aria-label]="'Rate ' + star + ' stars'"
-          >
-            <i
-              class="ph ph-star"
-              [style.color]="star <= currentRating ? 'var(--warning)' : 'var(--text-tertiary)'"
-            ></i>
-          </button>
-        </div>
-
         <mat-form-field appearance="outline">
-          <mat-label>Comment (optional)</mat-label>
+          <mat-label>Message</mat-label>
           <textarea
             matInput
-            formControlName="comment"
+            formControlName="message"
             rows="4"
             maxlength="500"
             placeholder="Tell us about your experience..."
           ></textarea>
-          <mat-hint>{{ form.get('comment')?.value?.length || 0 }}/500</mat-hint>
+          <mat-hint>{{ form.get('message')?.value?.length || 0 }}/500</mat-hint>
         </mat-form-field>
       </form>
 
@@ -56,7 +40,7 @@ import { ToastService } from '../toast/toast.service';
         <button
           class="btn btn-primary"
           (click)="submit()"
-          [disabled]="currentRating === 0 || isLoading"
+          [disabled]="form.invalid || isLoading"
         >
           {{ isLoading ? 'Submitting...' : 'Submit Feedback' }}
         </button>
@@ -123,11 +107,10 @@ import { ToastService } from '../toast/toast.service';
   `]
 })
 export class FeedbackDialogComponent {
-  currentRating = 0;
   isLoading = false;
 
   form = this.fb.group({
-    comment: ['', [Validators.maxLength(500)]]
+    message: ['', [Validators.required, Validators.maxLength(500)]]
   });
 
   constructor(
@@ -137,21 +120,13 @@ export class FeedbackDialogComponent {
     private toast: ToastService
   ) {}
 
-  setRating(rating: number) {
-    this.currentRating = rating;
-  }
-
   submit() {
-    if (this.currentRating === 0) return;
+    if (this.form.invalid) return;
     this.isLoading = true;
-    const payload = {
-      rating: this.currentRating,
-      comment: this.form.get('comment')?.value || undefined
-    };
-    this.feedbackService.submitFeedback(payload).subscribe({
+    this.feedbackService.submitFeedback({ message: this.form.value.message! }).subscribe({
       next: () => {
         this.toast.success('Thank you for your feedback!');
-        this.dialogRef.close();
+        this.dialogRef.close(true);
       },
       error: () => {
         this.toast.error('Failed to submit feedback. Please try again.');

@@ -69,7 +69,7 @@ export class AdminService {
   }
 
   getFeedback(): Observable<Feedback[]> {
-    return this.http.get<Feedback[]>(`${this.base}/api/admin/feedback`).pipe(catchError(e => throwError(() => e)));
+    return this.http.get<Feedback[]>(`${this.base}/api/feedback/admin`).pipe(catchError(e => throwError(() => e)));
   }
 
   getTickets(): Observable<Ticket[]> {
