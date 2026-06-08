@@ -1,0 +1,174 @@
+<div class="detail-page">
+
+  <!-- Loading skeleton -->
+  <div class="detail-skeleton" *ngIf="isLoading">
+    <app-loading-spinner variant="detail"></app-loading-spinner>
+  </div>
+
+  <!-- Error -->
+  <app-empty-state
+    *ngIf="!isLoading && error"
+    icon="ph ph-warning-circle"
+    heading="Car not found"
+    [body]="error"
+    ctaLabel="Back to browse"
+    ctaRoute="/browse"
+  ></app-empty-state>
+
+  <!-- Content -->
+  <ng-container *ngIf="!isLoading && car && !error">
+
+    <div class="breadcrumb">
+      <a routerLink="/browse">Browse</a>
+      <i class="ph ph-caret-right"></i>
+      <span>{{car.make}} {{car.model}}</span>
+    </div>
+
+    <div class="detail-layout">
+
+      <!-- Gallery (left) -->
+      <div class="gallery">
+        <div class="gallery-main" (click)="openLightbox(0)">
+          <img
+            class="gallery-primary"
+            [src]="thumbnails[0]"
+            [alt]="car.make + ' ' + car.model"
+            loading="eager">
+          <div class="gallery-overlay">
+            <i class="ph ph-arrows-out"></i>
+          </div>
+        </div>
+        <div class="gallery-strip">
+          <img
+            *ngFor="let thumb of thumbnails; let i = index"
+            class="gallery-thumb"
+            [class.gallery-thumb--active]="i === 0"
+            [src]="thumb"
+            [alt]="car.make + ' thumb ' + (i+1)"
+            loading="lazy"
+            (click)="openLightbox(i)">
+        </div>
+      </div>
+
+      <!-- Purchase rail (right, sticky) -->
+      <aside class="purchase-rail surface-card">
+        <h1 class="rail-title">
+          <span class="mono">{{car.year}}</span> {{car.make}} {{car.model}}
+        </h1>
+        <p class="rail-price mono">{{car.price | inrCurrency}}</p>
+
+        <div class="rail-chips">
+          <app-status-chip [status]="car.approvalStatus"></app-status-chip>
+          <span class="avail-chip avail-chip--ok" *ngIf="car.available">Available</span>
+          <span class="avail-chip avail-chip--sold" *ngIf="!car.available">Sold</span>
+        </div>
+
+        <!-- Buy now -->
+        <button
+          class="btn btn-primary btn-full"
+          (click)="buyNow()"
+          [disabled]="!canBuy()"
+          [title]="buyDisabledReason"
+        >
+          {{BUY_NOW}}
+        </button>
+
+        <p class="rail-reason" *ngIf="buyDisabledReason">{{buyDisabledReason}}</p>
+
+        <!-- Secondary actions -->
+        <div class="rail-actions">
+          <button class="btn btn-ghost btn-full" (click)="toggleWishlist()">
+            <i [class]="inWishlist ? 'ph ph-heart-fill' : 'ph ph-heart'"></i>
+            {{inWishlist ? 'Saved' : 'Add to wishlist'}}
+          </button>
+          <button class="btn btn-ghost btn-full" (click)="sellerVisible = !sellerVisible">
+            <i class="ph ph-phone"></i>
+            Contact seller
+          </button>
+          <button class="btn btn-ghost btn-full" (click)="addToCompare()">
+            <i [class]="compareService.isSelected(car.id) ? 'ph ph-scales-fill' : 'ph ph-scales'"></i>
+            Compare
+          </button>
+        </div>
+
+        <!-- Seller info (revealed) -->
+        <div class="seller-reveal" *ngIf="sellerVisible">
+          <p class="seller-name">{{car.seller.fullName}}</p>
+          <p class="seller-phone mono">{{car.seller.phoneNumber}}</p>
+        </div>
+
+        <p class="rail-reassurance">
+          <i class="ph ph-lock-simple"></i>
+          Every listing reviewed before going live.
+        </p>
+      </aside>
+    </div>
+
+    <!-- Specs -->
+    <section class="specs-section">
+      <h2 class="h3 specs-heading">Specifications</h2>
+      <div class="specs-grid">
+        <div class="spec-card surface-card">
+          <span class="spec-label">Mileage</span>
+          <span class="spec-value mono">{{car.mileage | number}} km</span>
+        </div>
+        <div class="spec-card surface-card">
+          <span class="spec-label">Year</span>
+          <span class="spec-value mono">{{car.year}}</span>
+        </div>
+        <div class="spec-card surface-card">
+          <span class="spec-label">Color</span>
+          <div class="spec-color">
+            <span class="color-swatch" [style.background]="car.color.toLowerCase()"></span>
+            <span class="spec-value mono">{{car.color}}</span>
+          </div>
+        </div>
+        <div class="spec-card surface-card">
+          <span class="spec-label">Listed</span>
+          <span class="spec-value mono">{{car.createdAt | date:'dd MMM yyyy'}}</span>
+        </div>
+        <div class="spec-card surface-card">
+          <span class="spec-label">Views</span>
+          <span class="spec-value mono">{{car.viewCount | number}}</span>
+        </div>
+        <div class="spec-card surface-card">
+          <span class="spec-label">Status</span>
+          <span class="spec-value mono">{{car.approvalStatus | titlecase}}</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- Description -->
+    <section class="desc-section" *ngIf="car.description">
+      <h2 class="h3 specs-heading">About this car</h2>
+      <p class="body desc-body">{{car.description}}</p>
+    </section>
+
+    <!-- Mobile sticky bar -->
+    <div class="mobile-sticky-bar">
+      <span class="mobile-price mono">{{car.price | inrCurrency}}</span>
+      <button class="btn btn-primary" (click)="buyNow()" [disabled]="!canBuy()">
+        {{BUY_NOW}}
+      </button>
+    </div>
+
+  </ng-container>
+
+  <!-- Lightbox -->
+  <div class="lightbox" *ngIf="lightboxOpen" (click)="closeLightbox()">
+    <div class="lightbox-inner" (click)="$event.stopPropagation()">
+      <button class="lb-nav lb-prev" (click)="prevImage()" aria-label="Previous">
+        <i class="ph ph-arrow-left"></i>
+      </button>
+      <img class="lb-img" [src]="thumbnails[lightboxIndex]" [alt]="car?.make" loading="eager">
+      <button class="lb-nav lb-next" (click)="nextImage()" aria-label="Next">
+        <i class="ph ph-arrow-right"></i>
+      </button>
+      <button class="lb-close" (click)="closeLightbox()" aria-label="Close">
+        <i class="ph ph-x"></i>
+      </button>
+    </div>
+  </div>
+
+  <app-compare-tray></app-compare-tray>
+</div>

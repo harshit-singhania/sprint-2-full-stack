@@ -1,0 +1,17 @@
+# Local environment and secrets
+.env
+.env.current
+.env.local
+.env.*.local
+!.env.example
+
+# Runtime logs
+*.log
+log.txt
+derby.log
+
+# Local Derby database
+usedcarsdb/
+
+# Build output
+target/

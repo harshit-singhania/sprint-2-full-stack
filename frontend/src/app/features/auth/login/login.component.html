@@ -1,0 +1,85 @@
+<div class="auth-root">
+  <!-- Left: cinematic image panel -->
+  <div class="auth-image-panel">
+    <div class="image-scrim"></div>
+    <a class="wordmark" routerLink="/">Carbon Market</a>
+    <p class="display-line">Find the one that's been waited for.</p>
+  </div>
+
+  <!-- Right: form panel -->
+  <div class="auth-form-panel">
+    <div class="form-wrap">
+      <h1 class="form-heading">Sign in</h1>
+
+      <form [formGroup]="form" (ngSubmit)="onSubmit()" class="auth-form" novalidate>
+
+        <!-- Username -->
+        <div class="field-group">
+          <label class="field-label" for="login-username">Username</label>
+          <input
+            id="login-username"
+            class="field-input"
+            type="text"
+            formControlName="username"
+            autocomplete="username"
+            [class.field-input--error]="(submitted || f['username'].touched) && f['username'].errors"
+          >
+          <span class="field-error" *ngIf="(submitted || f['username'].touched) && f['username'].errors?.['required']">Username is required.</span>
+          <span class="field-error" *ngIf="(submitted || f['username'].touched) && f['username'].errors?.['minlength']">Minimum 3 characters.</span>
+        </div>
+
+        <!-- Password -->
+        <div class="field-group">
+          <label class="field-label" for="login-password">Password</label>
+          <div class="field-input-wrap">
+            <input
+              id="login-password"
+              class="field-input"
+              [type]="showPassword ? 'text' : 'password'"
+              formControlName="password"
+              autocomplete="current-password"
+              [class.field-input--error]="((submitted || f['password'].touched) && f['password'].errors) || !!errorMessage"
+            >
+            <button
+              type="button"
+              class="eye-toggle"
+              (click)="showPassword = !showPassword"
+              [attr.aria-label]="showPassword ? 'Hide password' : 'Show password'"
+            >
+              <i class="ph" [ngClass]="showPassword ? 'ph-eye-slash' : 'ph-eye'"></i>
+            </button>
+          </div>
+          <span class="field-error" *ngIf="(submitted || f['password'].touched) && f['password'].errors?.['required']">Password is required.</span>
+          <span class="field-error" *ngIf="(submitted || f['password'].touched) && f['password'].errors?.['minlength']">Minimum 6 characters.</span>
+        </div>
+
+        <!-- Inline credentials error (not a toast) -->
+        <div class="inline-error" *ngIf="errorMessage" role="alert">
+          <i class="ph ph-warning-circle"></i>
+          {{ errorMessage }}
+        </div>
+
+        <!-- Submit -->
+        <button
+          type="submit"
+          class="btn btn-primary"
+          [disabled]="isLoading"
+        >
+          <span class="btn-spinner" *ngIf="isLoading">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+              <circle cx="12" cy="12" r="9" stroke-opacity="0.25"/>
+              <path d="M12 3a9 9 0 0 1 9 9" stroke-linecap="round"/>
+            </svg>
+          </span>
+          <span>{{ isLoading ? 'Signing in' : 'Sign in' }}</span>
+        </button>
+
+        <!-- Footer link -->
+        <p class="form-footer">
+          New here? <a routerLink="/register" class="accent-link">Create an account</a>
+        </p>
+
+      </form>
+    </div>
+  </div>
+</div>

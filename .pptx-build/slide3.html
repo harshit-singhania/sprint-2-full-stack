@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html>
+<head>
+<style>
+  * { box-sizing: border-box; }
+  html { background:#0E1726; }
+  body { width:720pt; height:405pt; margin:0; padding:0; display:flex; font-family:Arial, sans-serif; background:#0E1726; }
+  .rail { width:14pt; background:#F4A93B; }
+  .main { flex:1; padding:26pt 36pt; display:flex; flex-direction:column; }
+  .kicker { color:#2DD4BF; font-size:12pt; font-weight:bold; letter-spacing:2.5pt; margin:0; font-family:'Courier New', monospace; }
+  h2 { color:#F2F5F9; font-size:30pt; margin:5pt 0 0 0; }
+  .intro { color:#C3D0E2; font-size:13pt; margin:10pt 0 0 0; max-width:610pt; line-height:1.35; }
+  .flow { display:flex; align-items:stretch; margin-top:18pt; }
+  .step { flex:1; background:#16223C; border:1px solid #2A3A5C; border-top:5pt solid #2DD4BF; border-radius:7pt; padding:12pt 10pt; }
+  .step.gate { border-top-color:#F4A93B; }
+  .step .role { font-size:9.5pt; font-weight:bold; letter-spacing:1.5pt; margin:0; font-family:'Courier New', monospace; color:#A6B6CE; }
+  .step.gate .role { color:#F4A93B; }
+  .step .role.seller { color:#9FE9DE; }
+  .step .act { color:#F2F5F9; font-size:13pt; font-weight:bold; margin:7pt 0 0 0; line-height:1.25; }
+  .arrow { display:flex; align-items:center; padding:0 6pt; }
+  .arrow p { color:#3E5176; font-size:22pt; margin:0; }
+  .enums { margin-top:20pt; border-top:1px solid #243456; padding-top:13pt; display:flex; align-items:center; }
+  .enums .lbl { color:#7E90AB; font-size:10pt; letter-spacing:1.5pt; margin:0 16pt 0 0; font-family:'Courier New', monospace; }
+  .ec { background:#102A3A; border:1px solid #1E5A57; border-radius:5pt; padding:5pt 11pt; margin-right:9pt; }
+  .ec p { color:#2DD4BF; font-size:11pt; margin:0; font-family:'Courier New', monospace; font-weight:bold; }
+</style>
+</head>
+<body>
+  <div class="rail"></div>
+  <div class="main">
+    <p class="kicker">CORE FEATURE</p>
+    <h2>Trust, Enforced in Code</h2>
+    <p class="intro">A <b>three-party handshake</b> &mdash; no silent transactions. Every state change is explicit, modeled as enum-backed state machines.</p>
+    <div class="flow">
+      <div class="step"><p class="role seller">SELLER</p><p class="act">Lists a car</p></div>
+      <div class="arrow"><p>&rarr;</p></div>
+      <div class="step gate"><p class="role">ADMIN &middot; GATE 1</p><p class="act">Approves listing</p></div>
+      <div class="arrow"><p>&rarr;</p></div>
+      <div class="step"><p class="role">BUYER</p><p class="act">Places order</p></div>
+      <div class="arrow"><p>&rarr;</p></div>
+      <div class="step gate"><p class="role">ADMIN &middot; GATE 2</p><p class="act">Approves order</p></div>
+      <div class="arrow"><p>&rarr;</p></div>
+      <div class="step gate"><p class="role seller">SELLER &middot; GATE 3</p><p class="act">Approves sale &rarr; complete</p></div>
+    </div>
+    <div class="enums">
+      <p class="lbl">STATE MACHINES</p>
+      <div class="ec"><p>ApprovalStatus</p></div>
+      <div class="ec"><p>OrderStatus</p></div>
+      <div class="ec"><p>PaymentStatus</p></div>
+      <div class="ec"><p>Role</p></div>
+    </div>
+  </div>
+</body>
+</html>

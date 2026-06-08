@@ -1,0 +1,106 @@
+<div class="page ticket-detail-page">
+  <a routerLink="/tickets" class="back-link">
+    <i class="ph ph-arrow-left" aria-hidden="true"></i>
+    <span>Back to Support</span>
+  </a>
+
+  <app-loading-spinner *ngIf="isLoading" variant="detail"></app-loading-spinner>
+
+  <app-empty-state
+    *ngIf="!isLoading && error"
+    icon="ph ph-warning-circle"
+    title="Could not load this request"
+    message="It may have been removed or you may not have access."
+  >
+    <a class="btn btn-primary" routerLink="/tickets">Back to Support</a>
+  </app-empty-state>
+
+  <ng-container *ngIf="!isLoading && ticket && !error">
+    <section class="ticket-hero surface-card">
+      <div class="ticket-hero__copy">
+        <div class="eyebrow mono">Support thread</div>
+        <h1 class="display ticket-title">{{ ticket.subject }}</h1>
+        <p class="body ticket-meta">
+          Opened {{ ticket.createdAt | date:'dd MMM yyyy, hh:mm a' }} by {{ ticket.buyer.name }}
+        </p>
+      </div>
+
+      <div class="ticket-hero__status">
+        <app-status-chip [status]="ticket.status"></app-status-chip>
+        <span class="ticket-state mono">{{ ticket.responses.length }} updates</span>
+      </div>
+    </section>
+
+    <div class="ticket-layout">
+      <section class="surface-card thread-panel">
+        <div class="thread-list">
+          <article class="thread-bubble thread-bubble--mine">
+            <div class="thread-bubble__meta mono">
+              <span>{{ ticket.buyer.name }}</span>
+              <span>{{ ticket.createdAt | date:'dd MMM yyyy, hh:mm a' }}</span>
+            </div>
+            <p>{{ ticket.description }}</p>
+          </article>
+
+          <article
+            *ngFor="let reply of ticket.responses"
+            class="thread-bubble"
+            [class.thread-bubble--admin]="reply.sender.role === 'ADMIN'"
+            [class.thread-bubble--mine]="isOwnReply(reply)"
+          >
+            <div class="thread-bubble__meta mono">
+              <span>{{ reply.sender.name }}</span>
+              <span>{{ reply.respondedAt | date:'dd MMM yyyy, hh:mm a' }}</span>
+            </div>
+            <p>{{ reply.message }}</p>
+          </article>
+
+          <div *ngIf="!ticket.responses || ticket.responses.length === 0" class="thread-empty">
+            No replies yet. We will keep everything in this thread.
+          </div>
+        </div>
+      </section>
+
+      <aside class="surface-card composer-panel">
+        <div class="composer-panel__head">
+          <div class="h3">Send a reply</div>
+          <p class="body composer-note">Keep updates short so the team can act quickly.</p>
+        </div>
+
+        <form [formGroup]="replyForm" (ngSubmit)="sendReply()" class="composer-form">
+          <div class="field-group">
+            <label class="field-label" for="reply-message">Message</label>
+            <mat-form-field appearance="outline" class="form-field">
+              <textarea
+                id="reply-message"
+                matInput
+                formControlName="message"
+                rows="7"
+                placeholder="Type your reply"
+                [disabled]="ticket.status === 'CLOSED'"
+              ></textarea>
+            </mat-form-field>
+            <div class="field-help" *ngIf="ticket.status !== 'CLOSED'">Replies stay visible to your team and the support team.</div>
+            <div class="field-help" *ngIf="ticket.status === 'CLOSED'">This request is closed. Reopen it with a new request if you need more help.</div>
+          </div>
+
+          <div class="composer-error" *ngIf="replyError">{{ replyError }}</div>
+
+          <div class="composer-actions">
+            <button
+              class="btn btn-primary send-btn"
+              type="submit"
+              [disabled]="replyForm.invalid || isSending || ticket.status === 'CLOSED'"
+            >
+              <ng-container *ngIf="!isSending">Send</ng-container>
+              <ng-container *ngIf="isSending">
+                <app-loading-spinner variant="spinner"></app-loading-spinner>
+                <span>Sending</span>
+              </ng-container>
+            </button>
+          </div>
+        </form>
+      </aside>
+    </div>
+  </ng-container>
+</div>

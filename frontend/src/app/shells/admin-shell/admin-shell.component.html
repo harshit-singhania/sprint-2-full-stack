@@ -1,0 +1,102 @@
+<!-- Top bar: 56px, frosted -->
+<header class="top-bar" role="banner">
+  <!-- Hamburger (mobile) -->
+  <button class="hamburger-btn"
+          (click)="sidenav.toggle()"
+          aria-label="Toggle navigation">
+    <i class="ph ph-list" aria-hidden="true"></i>
+  </button>
+
+  <!-- Current page title -->
+  <h1 class="page-title h3">{{ pageTitle }}</h1>
+
+  <span class="flex-spacer"></span>
+
+  <!-- Account menu -->
+  <button class="avatar-btn"
+          [matMenuTriggerFor]="accountMenu"
+          aria-label="Account menu"
+          aria-haspopup="true">
+    <span class="avatar-initials mono">{{ initials }}</span>
+  </button>
+
+  <mat-menu #accountMenu="matMenu" class="account-menu">
+    <button mat-menu-item (click)="logout()">
+      <i class="ph ph-sign-out" aria-hidden="true"></i>
+      <span>Logout</span>
+    </button>
+  </mat-menu>
+</header>
+
+<!-- Sidenav container -->
+<mat-sidenav-container class="sidenav-container">
+  <!-- Sidebar -->
+  <mat-sidenav #sidenav
+               [mode]="isMobile ? 'over' : 'side'"
+               [opened]="!isMobile"
+               class="admin-sidenav"
+               role="navigation"
+               aria-label="Admin navigation">
+
+    <!-- ADMIN eyebrow -->
+    <div class="eyebrow mono">ADMIN</div>
+
+    <!-- Nav items -->
+    <nav class="sidenav-nav">
+      <a class="sidenav-item"
+         routerLink="/admin/dashboard"
+         routerLinkActive="sidenav-item--active"
+         (click)="isMobile && sidenav.close()">
+        <i class="ph ph-squares-four" aria-hidden="true"></i>
+        <span>Dashboard</span>
+      </a>
+
+      <a class="sidenav-item"
+         routerLink="/admin/cars/pending"
+         routerLinkActive="sidenav-item--active"
+         (click)="isMobile && sidenav.close()">
+        <i class="ph ph-car" aria-hidden="true"></i>
+        <span>Pending Cars</span>
+      </a>
+
+      <a class="sidenav-item"
+         routerLink="/admin/orders/pending"
+         routerLinkActive="sidenav-item--active"
+         (click)="isMobile && sidenav.close()">
+        <i class="ph ph-shopping-bag" aria-hidden="true"></i>
+        <span>Pending Orders</span>
+      </a>
+
+      <a class="sidenav-item"
+         routerLink="/admin/users"
+         routerLinkActive="sidenav-item--active"
+         (click)="isMobile && sidenav.close()">
+        <i class="ph ph-users" aria-hidden="true"></i>
+        <span>Users</span>
+      </a>
+
+      <div class="sidenav-divider" role="separator"></div>
+
+      <a class="sidenav-item"
+         routerLink="/admin/feedback"
+         routerLinkActive="sidenav-item--active"
+         (click)="isMobile && sidenav.close()">
+        <i class="ph ph-star" aria-hidden="true"></i>
+        <span>Feedback</span>
+      </a>
+
+      <a class="sidenav-item"
+         routerLink="/admin/tickets"
+         routerLinkActive="sidenav-item--active"
+         (click)="isMobile && sidenav.close()">
+        <i class="ph ph-lifebuoy" aria-hidden="true"></i>
+        <span>Support</span>
+      </a>
+    </nav>
+  </mat-sidenav>
+
+  <!-- Main content -->
+  <mat-sidenav-content class="admin-content">
+    <router-outlet></router-outlet>
+  </mat-sidenav-content>
+</mat-sidenav-container>

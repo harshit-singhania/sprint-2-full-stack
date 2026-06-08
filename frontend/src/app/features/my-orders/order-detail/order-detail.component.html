@@ -1,0 +1,172 @@
+<div class="page-container order-detail">
+  <a routerLink="/my-orders" class="back-link">
+    <i class="ph ph-arrow-left"></i> Back to orders
+  </a>
+
+  <app-loading-spinner *ngIf="isLoading"></app-loading-spinner>
+
+  <app-empty-state
+    *ngIf="!isLoading && error"
+    icon="ph ph-warning-circle"
+    title="Not found"
+    [message]="error"
+    ctaLabel="Back to orders"
+    ctaRoute="/my-orders">
+  </app-empty-state>
+
+  <ng-container *ngIf="!isLoading && order && !error">
+
+    <!-- Fraud alert -->
+    <div class="fraud-banner" *ngIf="order.fraudAlert">
+      <i class="ph ph-warning"></i>
+      <span><strong>Fraud alert:</strong> This transaction has been flagged for suspicious activity.</span>
+    </div>
+
+    <!-- Header -->
+    <div class="order-header">
+      <div>
+        <h2 class="h2">Order #{{ order.id }}</h2>
+        <p class="order-date mono">{{ order.createdAt | date:'dd MMM yyyy, HH:mm' }}</p>
+      </div>
+      <app-status-chip [status]="order.status"></app-status-chip>
+    </div>
+
+    <div class="detail-layout">
+
+      <!-- Vertical stepper -->
+      <div class="surface-card stepper-card">
+        <h3 class="h3 stepper-heading">Progress</h3>
+        <div class="stepper">
+          <div
+            *ngFor="let step of steps; let last = last"
+            class="step"
+            [class.step--done]="step.state === 'done'"
+            [class.step--active]="step.state === 'active'"
+            [class.step--upcoming]="step.state === 'upcoming'"
+            [class.step--danger]="step.state === 'danger'">
+            <div class="step-track">
+              <div class="step-node">
+                <i *ngIf="step.state === 'done'" class="ph ph-check-circle step-icon"></i>
+                <i *ngIf="step.state === 'danger'" class="ph ph-x-circle step-icon"></i>
+                <span *ngIf="step.state === 'active'" class="step-pulse"></span>
+                <span *ngIf="step.state === 'upcoming'" class="step-dot"></span>
+              </div>
+              <div *ngIf="!last" class="step-line"></div>
+            </div>
+            <div class="step-content">
+              <div class="step-label">{{ step.label }}</div>
+              <div *ngIf="step.sub" class="step-sub mono">{{ step.sub }}</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Panels -->
+      <div class="panels">
+
+        <!-- Car summary -->
+        <div class="surface-card panel">
+          <h3 class="h3 panel-title">Vehicle</h3>
+          <div class="car-summary">
+            <img class="car-thumb" [src]="carThumb" [alt]="order.car?.make + ' ' + order.car?.model">
+            <div>
+              <div class="h3">{{ order.car?.make }} {{ order.car?.model }}</div>
+              <div class="mono text-secondary">{{ order.car?.year }} · {{ order.car?.color }}</div>
+              <div class="mono text-secondary">{{ order.car?.mileage | number }} km</div>
+            </div>
+          </div>
+          <div class="panel-row">
+            <span class="panel-label">Price</span>
+            <span class="mono">{{ order.amount | inrCurrency }}</span>
+          </div>
+        </div>
+
+        <!-- Parties -->
+        <div class="surface-card panel">
+          <h3 class="h3 panel-title">Parties</h3>
+          <div class="party">
+            <div class="party-header">
+              <span class="party-role">Buyer</span>
+              <span *ngIf="isBuyer" class="you-tag">You</span>
+            </div>
+            <div class="panel-row">
+              <span class="panel-label">Name</span>
+              <span>{{ order.buyer?.fullName }}</span>
+            </div>
+            <div class="panel-row">
+              <span class="panel-label">Phone</span>
+              <span class="mono">{{ order.buyer?.phoneNumber }}</span>
+            </div>
+          </div>
+          <div class="party-divider"></div>
+          <div class="party">
+            <div class="party-header">
+              <span class="party-role">Seller</span>
+              <span *ngIf="isSeller" class="you-tag">You</span>
+            </div>
+            <div class="panel-row">
+              <span class="panel-label">Name</span>
+              <span>{{ order.seller?.fullName }}</span>
+            </div>
+            <div class="panel-row">
+              <span class="panel-label">Phone</span>
+              <span class="mono">{{ order.seller?.phoneNumber }}</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Payment -->
+        <div class="surface-card panel">
+          <h3 class="h3 panel-title">
+            Payment
+            <span *ngIf="order.fraudAlert" class="fraud-badge">
+              <i class="ph ph-warning"></i> Flagged
+            </span>
+          </h3>
+          <div class="panel-row">
+            <span class="panel-label">Amount</span>
+            <span class="mono">{{ order.amount | inrCurrency }}</span>
+          </div>
+          <div class="panel-row">
+            <span class="panel-label">Method</span>
+            <span>{{ order.paymentMethod }}</span>
+          </div>
+          <div class="panel-row">
+            <span class="panel-label">Status</span>
+            <app-status-chip [status]="order.paymentStatus"></app-status-chip>
+          </div>
+          <div class="panel-row" *ngIf="order.paymentToken">
+            <span class="panel-label">Token</span>
+            <span class="mono token">{{ maskToken(order.paymentToken) }}</span>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- Seller actions -->
+    <div class="surface-card seller-action-card" *ngIf="canActAsSeller">
+      <div class="seller-action-header">
+        <h3 class="h3">Action required</h3>
+        <p class="body text-secondary">Admin has approved this order. Please confirm or reject the sale.</p>
+      </div>
+      <div class="seller-action-btns">
+        <button
+          class="btn btn-primary"
+          [disabled]="isApproving || isRejecting"
+          (click)="approveSale()">
+          <span *ngIf="isApproving" class="spinner-inline"></span>
+          <span>{{ isApproving ? 'Approving…' : 'Approve sale' }}</span>
+        </button>
+        <button
+          class="btn btn-ghost danger-hover"
+          [disabled]="isApproving || isRejecting"
+          (click)="rejectSale()">
+          <span *ngIf="isRejecting" class="spinner-inline"></span>
+          <span>{{ isRejecting ? 'Rejecting…' : 'Reject sale' }}</span>
+        </button>
+      </div>
+    </div>
+
+  </ng-container>
+</div>

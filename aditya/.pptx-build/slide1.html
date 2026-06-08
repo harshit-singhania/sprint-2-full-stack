@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html>
+<head>
+<style>
+  * { box-sizing: border-box; }
+  html { background:#0E141B; }
+  body { width:720pt; height:405pt; margin:0; padding:0; display:flex; font-family:Arial, sans-serif; background:#0E141B; }
+  .rail { width:14pt; background:#2FBF71; }
+  .main { flex:1; padding:32pt 44pt 42pt 44pt; display:flex; flex-direction:column; }
+  .kicker { color:#F5A524; font-size:13pt; font-weight:bold; letter-spacing:3pt; margin:0; font-family:'Courier New', monospace; }
+  h1 { color:#EAF0F6; font-size:66pt; margin:10pt 0 0 0; letter-spacing:-1pt; }
+  .accent { color:#2FBF71; }
+  .tag { color:#C2CEDA; font-size:17pt; margin:14pt 0 0 0; max-width:580pt; line-height:1.35; }
+  .chips { margin:24pt 0 0 0; display:flex; flex-wrap:wrap; }
+  .chip { background:#18222E; border:1px solid #2A3848; border-radius:6pt; padding:7pt 13pt; margin:0 9pt 9pt 0; }
+  .chip p { margin:0; color:#7DE3AC; font-size:12pt; font-family:'Courier New', monospace; font-weight:bold; }
+  .spacer { flex:1; }
+  .foot { display:flex; border-top:1px solid #25323F; padding-top:14pt; }
+  .foot .col { flex:1; }
+  .foot .lbl { color:#7B8C9C; font-size:10pt; letter-spacing:1.5pt; margin:0; font-family:'Courier New', monospace; }
+  .foot .val { color:#EAF0F6; font-size:14pt; margin:4pt 0 0 0; font-weight:bold; }
+  .foot .val.mono { font-family:'Courier New', monospace; color:#F5A524; }
+</style>
+</head>
+<body>
+  <div class="rail"></div>
+  <div class="main">
+    <p class="kicker">VEHICLE RENTAL MANAGEMENT &middot; FULL-STACK</p>
+    <h1>Rental<span class="accent">Sphere</span></h1>
+    <p class="tag">A full-stack platform that simulates a <b>real-world vehicle-rental business end to end</b> &mdash; enterprise security, gated lifecycle, audit logging.</p>
+    <div class="chips">
+      <div class="chip"><p>Java 17</p></div>
+      <div class="chip"><p>Spring Boot 3.x</p></div>
+      <div class="chip"><p>Spring Security</p></div>
+      <div class="chip"><p>JWT</p></div>
+      <div class="chip"><p>MySQL</p></div>
+      <div class="chip"><p>Angular</p></div>
+    </div>
+    <div class="spacer"></div>
+    <div class="foot">
+      <div class="col"><p class="lbl">TEAM</p><p class="val">6 engineers</p></div>
+      <div class="col"><p class="lbl">SURFACE</p><p class="val">10 modules &middot; 8 core tables</p></div>
+      <div class="col"><p class="lbl">ACCESS</p><p class="val mono">3 API tiers</p></div>
+    </div>
+  </div>
+</body>
+</html>

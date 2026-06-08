@@ -1,0 +1,162 @@
+<div class="dashboard-page">
+  <div class="page-head">
+    <div>
+      <div class="eyebrow mono">Admin overview</div>
+      <h1 class="page-heading">Dashboard</h1>
+      <p class="body page-intro">A quiet overview of the queues, open support, and revenue that needs attention.</p>
+    </div>
+  </div>
+
+  <ng-container *ngIf="isLoading">
+    <div class="metrics-grid">
+      <div class="metric-tile surface-card" *ngFor="let _ of [0,1,2,3]">
+        <div class="metric-skeleton skeleton"></div>
+        <div class="metric-skeleton metric-skeleton--small skeleton"></div>
+      </div>
+    </div>
+
+    <div class="attention-grid">
+      <div class="attention-panel surface-card">
+        <div class="panel-header">
+          <div>
+            <div class="h3">Needs your attention</div>
+            <p class="body">Pending cars and orders waiting for a decision.</p>
+          </div>
+        </div>
+        <app-loading-spinner variant="row"></app-loading-spinner>
+        <app-loading-spinner variant="row"></app-loading-spinner>
+      </div>
+
+      <div class="attention-panel surface-card">
+        <div class="panel-header">
+          <div>
+            <div class="h3">Open support</div>
+            <p class="body">Threads that need a quick reply.</p>
+          </div>
+        </div>
+        <app-loading-spinner variant="row"></app-loading-spinner>
+        <app-loading-spinner variant="row"></app-loading-spinner>
+      </div>
+    </div>
+  </ng-container>
+
+  <ng-container *ngIf="!isLoading">
+    <app-empty-state
+      *ngIf="error"
+      icon="ph ph-warning-circle"
+      title="Dashboard could not load"
+      message="Try again in a moment."
+    >
+      <button class="btn btn-primary" type="button" (click)="loadDashboard()">Retry</button>
+    </app-empty-state>
+
+    <ng-container *ngIf="!error && dashboard">
+      <div class="metrics-grid">
+        <div class="metric-tile surface-card">
+          <div class="metric-label">Pending cars</div>
+          <div class="metric-value mono">{{ dashboard.pendingCarApprovals }}</div>
+          <div class="metric-sub mono">{{ dashboard.totalCars }} total listings</div>
+        </div>
+
+        <div class="metric-tile surface-card">
+          <div class="metric-label">Pending orders</div>
+          <div class="metric-value mono">{{ dashboard.pendingAdminOrders + dashboard.pendingOrders }}</div>
+          <div class="metric-sub mono">{{ dashboard.totalOrders }} total orders</div>
+        </div>
+
+        <div class="metric-tile surface-card">
+          <div class="metric-label">Total revenue</div>
+          <div class="metric-value mono">{{ formatRevenue(dashboard.totalRevenue) }}</div>
+          <div class="metric-sub mono">{{ dashboard.approvedOrders }} approved orders</div>
+        </div>
+
+        <div class="metric-tile surface-card">
+          <div class="metric-label">Open tickets</div>
+          <div class="metric-value mono">{{ dashboard.openTickets }}</div>
+          <div class="metric-sub mono">{{ dashboard.closedTickets }} closed tickets</div>
+        </div>
+      </div>
+
+      <div class="attention-grid">
+        <section class="attention-panel surface-card">
+          <div class="panel-header">
+            <div>
+              <div class="h3">Needs your attention</div>
+              <p class="body">Latest pending listings, ready for review.</p>
+            </div>
+            <a class="btn btn-ghost" routerLink="/admin/cars/pending">View all</a>
+          </div>
+
+          <app-empty-state
+            *ngIf="pendingCars.length === 0"
+            icon="ph ph-check-circle"
+            title="All clear"
+            message="No listings are waiting for review."
+          ></app-empty-state>
+
+          <div *ngIf="pendingCars.length > 0" class="queue-list">
+            <article class="queue-row" *ngFor="let car of pendingCars">
+              <img class="queue-thumb" [src]="carPhotoSeed(car)" [alt]="car.make + ' ' + car.model">
+
+              <div class="queue-copy">
+                <div class="queue-title h3">{{ car.make }} {{ car.model }} {{ car.year }}</div>
+                <div class="queue-meta">
+                  <span class="mono">{{ car.price | inrCurrency }}</span>
+                  <span class="mono">{{ car.seller.fullName }}</span>
+                </div>
+              </div>
+
+              <div class="queue-actions">
+                <button class="btn btn-ghost queue-action" type="button" (click)="approveCar(car)">Approve</button>
+                <button class="btn btn-ghost queue-action queue-action--danger" type="button" (click)="rejectCar(car)">Reject</button>
+              </div>
+            </article>
+          </div>
+        </section>
+
+        <section class="attention-panel surface-card">
+          <div class="panel-header">
+            <div>
+              <div class="h3">Pending orders</div>
+              <p class="body">Latest payment and approval requests.</p>
+            </div>
+            <a class="btn btn-ghost" routerLink="/admin/orders/pending">View all</a>
+          </div>
+
+          <app-empty-state
+            *ngIf="pendingOrders.length === 0"
+            icon="ph ph-bag"
+            title="All clear"
+            message="No orders are waiting for approval."
+          ></app-empty-state>
+
+          <div *ngIf="pendingOrders.length > 0" class="queue-list">
+            <article class="queue-row queue-row--order" *ngFor="let order of pendingOrders">
+              <div class="queue-copy">
+                <div class="queue-title h3">Order #{{ order.id }}</div>
+                <div class="queue-meta">
+                  <span class="mono">{{ order.car.make }} {{ order.car.model }}</span>
+                  <span class="mono">{{ order.amount | inrCurrency }}</span>
+                </div>
+                <div class="queue-meta queue-meta--secondary">
+                  <span class="mono">{{ order.buyer.fullName }}</span>
+                  <span class="mono">{{ order.seller.fullName }}</span>
+                  <app-status-chip [status]="order.paymentStatus"></app-status-chip>
+                </div>
+                <div class="fraud-badge" *ngIf="order.fraudAlert">
+                  <i class="ph ph-warning-circle" aria-hidden="true"></i>
+                  Fraud alert
+                </div>
+              </div>
+
+              <div class="queue-actions">
+                <button class="btn btn-primary queue-action" type="button" (click)="approveOrder(order)">Approve</button>
+                <button class="btn btn-ghost queue-action queue-action--danger" type="button" (click)="rejectOrder(order)">Reject</button>
+              </div>
+            </article>
+          </div>
+        </section>
+      </div>
+    </ng-container>
+  </ng-container>
+</div>

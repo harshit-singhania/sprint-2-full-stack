@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html>
+<head>
+<style>
+  * { box-sizing: border-box; }
+  html { background:#0E141B; }
+  body { width:720pt; height:405pt; margin:0; padding:0; display:flex; font-family:Arial, sans-serif; background:#0E141B; }
+  .rail { width:14pt; background:#F5A524; }
+  .main { flex:1; padding:26pt 36pt; display:flex; flex-direction:column; }
+  .kicker { color:#2FBF71; font-size:12pt; font-weight:bold; letter-spacing:2.5pt; margin:0; font-family:'Courier New', monospace; }
+  h2 { color:#EAF0F6; font-size:30pt; margin:5pt 0 0 0; }
+  .intro { color:#C2CEDA; font-size:13pt; margin:9pt 0 0 0; line-height:1.35; }
+  .intro b { color:#7DE3AC; }
+  .cards { display:flex; flex:1; margin-top:14pt; }
+  .card { flex:1; background:#18222E; border:1px solid #2A3848; border-radius:8pt; padding:13pt 15pt; margin-right:12pt; display:flex; flex-direction:column; }
+  .card:last-child { margin-right:0; }
+  .card.pub { border-top:5pt solid #2FBF71; }
+  .card.usr { border-top:5pt solid #5BA8FF; }
+  .card.adm { border-top:5pt solid #F5A524; }
+  .card h3 { color:#EAF0F6; font-size:16pt; margin:0; }
+  .card .tier { color:#7B8C9C; font-size:9pt; letter-spacing:1.5pt; margin:3pt 0 9pt 0; font-family:'Courier New', monospace; }
+  .card .ep { color:#9FD9B8; font-size:10.5pt; margin:0 0 5pt 0; font-family:'Courier New', monospace; }
+  .card.usr .ep { color:#A9CEF5; }
+  .card.adm .ep { color:#F3CE93; }
+  .foot { margin-top:13pt; border-top:1px solid #25323F; padding-top:11pt; display:flex; align-items:center; }
+  .foot .h { color:#7B8C9C; font-size:9.5pt; letter-spacing:1.5pt; margin:0 14pt 0 0; font-family:'Courier New', monospace; }
+  .foot .v { color:#F5A524; font-size:12pt; margin:0; font-family:'Courier New', monospace; font-weight:bold; }
+</style>
+</head>
+<body>
+  <div class="rail"></div>
+  <div class="main">
+    <p class="kicker">API &amp; ACCESS MODEL</p>
+    <h2>Three Tiers of Access</h2>
+    <p class="intro">Every endpoint is classified &mdash; the Spring Security filter chain enforces the boundary for <b>USER</b> and <b>ADMIN</b> roles.</p>
+    <div class="cards">
+      <div class="card pub">
+        <h3>Public</h3>
+        <p class="tier">OPEN TO ALL</p>
+        <p class="ep">/api/v1/auth/**</p>
+        <p class="ep">/api/v1/vehicles/**</p>
+      </div>
+      <div class="card usr">
+        <h3>Protected &middot; USER</h3>
+        <p class="tier">AUTHENTICATED</p>
+        <p class="ep">/users  /bookings</p>
+        <p class="ep">/payment  /billing</p>
+        <p class="ep">/notifications  /support</p>
+      </div>
+      <div class="card adm">
+        <h3>Admin</h3>
+        <p class="tier">ROLE = ADMIN</p>
+        <p class="ep">/api/v1/admin/**</p>
+        <p class="ep">full management surface</p>
+      </div>
+    </div>
+    <div class="foot">
+      <p class="h">AUTH HEADER</p>
+      <p class="v">Authorization: Bearer &lt;JWT&gt;  &middot;  Swagger UI /swagger-ui/index.html</p>
+    </div>
+  </div>
+</body>
+</html>
