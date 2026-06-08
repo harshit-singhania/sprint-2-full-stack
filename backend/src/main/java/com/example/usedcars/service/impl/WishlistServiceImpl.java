@@ -5,7 +5,6 @@ import com.example.usedcars.exception.ApiException;
 import com.example.usedcars.model.AppUser;
 import com.example.usedcars.model.ApprovalStatus;
 import com.example.usedcars.model.Car;
-import com.example.usedcars.model.Role;
 import com.example.usedcars.model.WishlistItem;
 import com.example.usedcars.repository.WishlistRepository;
 import com.example.usedcars.service.CarService;
@@ -31,7 +30,7 @@ public class WishlistServiceImpl implements WishlistService {
     @Override
     @Transactional
     public WishlistItem add(String token, Long carId) {
-        AppUser user = sessionService.requireRole(token, Role.USER);
+        AppUser user = sessionService.requireUser(token);
         Car car = carService.getCar(carId);
         if (car.getApprovalStatus() != ApprovalStatus.APPROVED || !car.isAvailable()) {
             throw new ApiException(HttpStatus.BAD_REQUEST, "Only approved available cars can be added to wishlist");
@@ -47,7 +46,7 @@ public class WishlistServiceImpl implements WishlistService {
     @Override
     @Transactional
     public ApiMessage remove(String token, Long carId) {
-        AppUser user = sessionService.requireRole(token, Role.USER);
+        AppUser user = sessionService.requireUser(token);
         Car car = carService.getCar(carId);
         WishlistItem item = wishlistRepository.findByBuyerAndCar(user, car)
                 .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "Wishlist item not found"));
@@ -58,7 +57,7 @@ public class WishlistServiceImpl implements WishlistService {
     @Override
     @Transactional(readOnly = true)
     public List<WishlistItem> list(String token) {
-        AppUser user = sessionService.requireRole(token, Role.USER);
+        AppUser user = sessionService.requireUser(token);
         return wishlistRepository.findByBuyer(user);
     }
 }
