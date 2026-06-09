@@ -10,4 +10,5 @@ import org.springframework.data.jpa.repository.JpaRepository;
 public interface WishlistRepository extends JpaRepository<WishlistItem, Long> {
     List<WishlistItem> findByBuyer(AppUser buyer);
     Optional<WishlistItem> findByBuyerAndCar(AppUser buyer, Car car);
+    void deleteByCar(Car car);
 }

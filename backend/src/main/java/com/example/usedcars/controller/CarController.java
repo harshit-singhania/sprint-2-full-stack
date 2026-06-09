@@ -20,8 +20,9 @@ public class CarController {
     private CarService carService;
 
     @PostMapping
-    public Car add(@RequestHeader("X-Session-Token") String token, @Valid @RequestBody CarRequest request) {
-        return carService.addCar(token, request);
+    public ApiMessage add(@RequestHeader("X-Session-Token") String token, @Valid @RequestBody CarRequest request) {
+        carService.addCar(token, request);
+        return new ApiMessage("Car listing submitted successfully and sent for admin approval");
     }
 
     @PutMapping("/{carId}")

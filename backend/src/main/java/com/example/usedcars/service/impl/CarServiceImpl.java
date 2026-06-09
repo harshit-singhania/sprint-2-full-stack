@@ -30,6 +30,9 @@ public class CarServiceImpl implements CarService {
     @Autowired
     private SessionService sessionService;
 
+    @Autowired
+    private com.example.usedcars.repository.WishlistRepository wishlistRepository;
+
     @Override
     @Transactional
     public Car addCar(String token, CarRequest request) {
@@ -62,6 +65,8 @@ public class CarServiceImpl implements CarService {
         AppUser user = sessionService.requireUser(token);
         Car car = getCar(carId);
         ensureCarOwnerOrAdmin(user, car);
+        wishlistRepository.deleteByCar(car);
+        recentViewRepository.deleteByCar(car);
         carRepository.delete(car);
         return new ApiMessage("Car deleted successfully");
     }

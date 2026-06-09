@@ -68,6 +68,14 @@ export class AdminService {
     return this.http.get<User[]>(`${this.base}/api/admin/users`).pipe(catchError(e => throwError(() => e)));
   }
 
+  updateUser(id: number, data: Partial<User>): Observable<User> {
+    return this.http.put<User>(`${this.base}/api/admin/users/${id}`, data).pipe(catchError(e => throwError(() => e)));
+  }
+
+  updateCar(id: number, data: Partial<Car>): Observable<Car> {
+    return this.http.put<Car>(`${this.base}/api/admin/cars/${id}`, data).pipe(catchError(e => throwError(() => e)));
+  }
+
   getFeedback(): Observable<Feedback[]> {
     return this.http.get<Feedback[]>(`${this.base}/api/feedback/admin`).pipe(catchError(e => throwError(() => e)));
   }

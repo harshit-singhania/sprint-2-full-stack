@@ -128,7 +128,7 @@ action.
 **Admin bootstrap.** Registration normally creates a `USER`. Registering with
 role `ADMIN` is allowed **only while no admin exists** (`countByRole(ADMIN) == 0`);
 afterwards it returns `409 Admin user already exists`. Username, phone number,
-and email are each unique.
+and email are each unique. Passwords must be at least 10 characters.
 
 ---
 
@@ -175,6 +175,10 @@ Seller creates car ──► ApprovalStatus.PENDING_ADMIN_APPROVAL
 true`, **and not owned by the requesting user** (admins see all approved
 listings). Viewing a non-approved car is forbidden unless you are its seller or
 an admin; each successful view increments `viewCount` and records a `RecentView`.
+
+**Deletion.** Sellers and admins can delete car listings. Related `WishlistItem` 
+and `RecentView` records are automatically removed. Cars with existing 
+`PurchaseOrder` records cannot be deleted (orders are historical records).
 
 ### 6.2 Purchase / order lifecycle
 
@@ -260,8 +264,11 @@ and `/user/*` (and `/seller/*`/`/user/*`) aliases.
 | Support | `POST /api/support-tickets/{id}/messages` | add a message |
 | Feedback | `POST /api/feedback` | submit feedback |
 | Admin | `GET /api/admin/dashboard` | aggregate stats |
+| Admin | `GET /api/admin/users` | list all users |
 | Admin | `GET /api/admin/cars/pending` · `POST /api/admin/cars/{id}/approve` · `/reject` | moderate listings |
+| Admin | `PUT /api/admin/cars/{id}` | edit car listing details |
 | Admin | `GET /api/admin/orders` · `GET /api/admin/orders/pending` · `POST /api/admin/orders/{id}/approve` · `/reject` | moderate orders |
+| Admin | `PUT /api/admin/users/{id}` | edit user details (username, name, phone, email, role) |
 | Admin | `GET /api/admin/support-tickets` · `PATCH /api/admin/support-tickets/{id}` | manage tickets |
 | Admin | `GET /api/feedback/admin` | read feedback |
 
@@ -293,7 +300,8 @@ See [`backend/API_SCHEMA.md`](backend/API_SCHEMA.md) for request/response bodies
 Feature areas: `browse`, `car-detail` (+ `purchase-dialog`), `my-listings`
 (`list-car`/`edit-car`), `my-orders` (+ `order-detail`), `wishlist`, `compare`,
 `tickets`, `auth` (`login`/`register`), and the `admin/*` screens (dashboard,
-pending cars, pending orders, users, feedback, tickets).
+pending cars, pending orders, users, feedback, tickets). Admin screens include
+inline editing for users and car listings via modal dialogs.
 
 ---
 
@@ -332,8 +340,8 @@ three accounts below, seed support tickets, and **8 approved listings** owned by
 | Role | Username | Password | Used for |
 |---|---|---|---|
 | Admin | `demoadmin` | `Demo@1234x` | approvals, moderation, admin dashboard |
-| Buyer | `demouser` | `Demo@1234` | browse, wishlist, purchase |
-| Seller | `demoseller` | `Demo@1234` | owns the seeded approved listings |
+| Buyer | `demouser` | `Demo@12345` | browse, wishlist, purchase |
+| Seller | `demoseller` | `Demo@12345` | owns the seeded approved listings |
 
 > The admin password ends in `x`. Disable seeding with `DEMO_SEED=false`.
 

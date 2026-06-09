@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormsModule } from '@angular/forms';
+import { FormsModule, ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { User } from '../../../core/models/user.model';
 import { AdminService } from '../../../core/services/admin.service';
 import { LoadingSpinnerComponent } from '../../../shared/components/loading-spinner/loading-spinner.component';
@@ -12,6 +12,7 @@ import { EmptyStateComponent } from '../../../shared/components/empty-state/empt
   imports: [
     CommonModule,
     FormsModule,
+    ReactiveFormsModule,
     LoadingSpinnerComponent,
     EmptyStateComponent
   ],
@@ -66,6 +67,7 @@ import { EmptyStateComponent } from '../../../shared/components/empty-state/empt
                   <th>Email</th>
                   <th>Phone</th>
                   <th>Role</th>
+                  <th></th>
                 </tr>
               </thead>
               <tbody>
@@ -84,12 +86,60 @@ import { EmptyStateComponent } from '../../../shared/components/empty-state/empt
                       {{ user.role }}
                     </span>
                   </td>
+                  <td>
+                    <button class="btn-icon" (click)="editUser(user)" title="Edit user">
+                      <i class="ph ph-pencil-simple"></i>
+                    </button>
+                  </td>
                 </tr>
               </tbody>
             </table>
           </div>
         </ng-container>
       </ng-container>
+
+      <!-- Edit Modal -->
+      <div class="modal-overlay" *ngIf="editingUser" (click)="cancelEdit()">
+        <div class="modal-content" (click)="$event.stopPropagation()">
+          <div class="modal-header">
+            <h2>Edit User</h2>
+            <button class="btn-icon" (click)="cancelEdit()">
+              <i class="ph ph-x"></i>
+            </button>
+          </div>
+          <form [formGroup]="editForm" (ngSubmit)="saveEdit()">
+            <div class="form-group">
+              <label>Name</label>
+              <input type="text" formControlName="name" placeholder="Full Name">
+            </div>
+            <div class="form-group">
+              <label>Username</label>
+              <input type="text" formControlName="username" placeholder="username">
+            </div>
+            <div class="form-group">
+              <label>Email</label>
+              <input type="email" formControlName="email" placeholder="email@example.com">
+            </div>
+            <div class="form-group">
+              <label>Phone</label>
+              <input type="tel" formControlName="phoneNumber" placeholder="9876543210">
+            </div>
+            <div class="form-group">
+              <label>Role</label>
+              <select formControlName="role">
+                <option value="USER">USER</option>
+                <option value="ADMIN">ADMIN</option>
+              </select>
+            </div>
+            <div class="modal-actions">
+              <button type="button" class="btn-secondary" (click)="cancelEdit()">Cancel</button>
+              <button type="submit" class="btn-primary" [disabled]="!editForm.valid || saving">
+                {{ saving ? 'Saving...' : 'Save Changes' }}
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
     </div>
   `,
   styles: [`
@@ -224,6 +274,128 @@ import { EmptyStateComponent } from '../../../shared/components/empty-state/empt
         overflow-x: auto;
       }
     }
+
+    .btn-icon {
+      width: 36px;
+      height: 36px;
+      border-radius: var(--radius-m);
+      display: grid;
+      place-items: center;
+      background: transparent;
+      border: 1px solid var(--hairline);
+      color: var(--text-secondary);
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+
+    .btn-icon:hover {
+      background: var(--surface-2);
+      color: var(--text-primary);
+    }
+
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.7);
+      display: grid;
+      place-items: center;
+      z-index: 1000;
+      padding: 20px;
+    }
+
+    .modal-content {
+      background: var(--surface-1);
+      border: 1px solid var(--hairline);
+      border-radius: var(--radius-l);
+      width: 100%;
+      max-width: 500px;
+      padding: 24px;
+    }
+
+    .modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+    }
+
+    .modal-header h2 {
+      margin: 0;
+      font-size: 20px;
+    }
+
+    .form-group {
+      margin-bottom: 16px;
+    }
+
+    .form-group label {
+      display: block;
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--text-secondary);
+      margin-bottom: 6px;
+    }
+
+    .form-group input,
+    .form-group select {
+      width: 100%;
+      height: 44px;
+      background: var(--surface-2);
+      border: 1px solid var(--hairline);
+      border-radius: var(--radius-m);
+      padding: 0 14px;
+      color: var(--text-primary);
+      font: inherit;
+    }
+
+    .form-group input:focus,
+    .form-group select:focus {
+      outline: 2px solid var(--accent);
+      outline-offset: -1px;
+    }
+
+    .modal-actions {
+      display: flex;
+      gap: 12px;
+      justify-content: flex-end;
+      margin-top: 24px;
+    }
+
+    .btn-primary,
+    .btn-secondary {
+      height: 44px;
+      padding: 0 20px;
+      border-radius: var(--radius-m);
+      font: inherit;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+
+    .btn-primary {
+      background: var(--accent);
+      color: white;
+      border: 0;
+    }
+
+    .btn-primary:hover:not(:disabled) {
+      opacity: 0.9;
+    }
+
+    .btn-primary:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    .btn-secondary {
+      background: transparent;
+      color: var(--text-primary);
+      border: 1px solid var(--hairline);
+    }
+
+    .btn-secondary:hover {
+      background: var(--surface-2);
+    }
   `]
 })
 export class AdminUsersComponent implements OnInit {
@@ -233,10 +405,17 @@ export class AdminUsersComponent implements OnInit {
   error = '';
   searchTerm = '';
   skeletonRows = [0, 1, 2, 3, 4];
+  editingUser: User | null = null;
+  editForm!: FormGroup;
+  saving = false;
 
-  constructor(private adminService: AdminService) {}
+  constructor(
+    private adminService: AdminService,
+    private fb: FormBuilder
+  ) {}
 
   ngOnInit() {
+    this.buildForm();
     this.adminService.getUsers().subscribe({
       next: (users) => {
         this.allUsers = users;
@@ -246,6 +425,55 @@ export class AdminUsersComponent implements OnInit {
       error: () => {
         this.error = 'Failed to load users.';
         this.isLoading = false;
+      }
+    });
+  }
+
+  buildForm() {
+    this.editForm = this.fb.group({
+      name: ['', Validators.required],
+      username: ['', Validators.required],
+      email: ['', [Validators.required, Validators.email]],
+      phoneNumber: ['', [Validators.required, Validators.pattern(/^[6-9]\d{9}$/)]],
+      role: ['USER', Validators.required]
+    });
+  }
+
+  editUser(user: User) {
+    this.editingUser = user;
+    this.editForm.patchValue({
+      name: user.name,
+      username: user.username,
+      email: user.email,
+      phoneNumber: user.phoneNumber,
+      role: user.role
+    });
+  }
+
+  cancelEdit() {
+    this.editingUser = null;
+    this.editForm.reset();
+  }
+
+  saveEdit() {
+    if (!this.editingUser || !this.editForm.valid || this.saving) return;
+
+    this.saving = true;
+    const formData = this.editForm.value;
+
+    this.adminService.updateUser(this.editingUser.id, formData).subscribe({
+      next: (updated) => {
+        const idx = this.allUsers.findIndex(u => u.id === updated.id);
+        if (idx !== -1) {
+          this.allUsers[idx] = updated;
+        }
+        this.applyFilter();
+        this.saving = false;
+        this.cancelEdit();
+      },
+      error: (err) => {
+        alert(err?.error?.message || 'Failed to update user');
+        this.saving = false;
       }
     });
   }

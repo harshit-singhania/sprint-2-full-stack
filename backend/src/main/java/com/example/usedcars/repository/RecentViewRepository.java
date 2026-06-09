@@ -6,4 +6,5 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface RecentViewRepository extends JpaRepository<RecentView, Long> {
     List<RecentView> findTop10BySessionTokenOrderByViewedAtDesc(String sessionToken);
+    void deleteByCar(com.example.usedcars.model.Car car);
 }

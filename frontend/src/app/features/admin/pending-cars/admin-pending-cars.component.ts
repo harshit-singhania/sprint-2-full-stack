@@ -1,5 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { FormsModule, ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { MatDialog } from '@angular/material/dialog';
 import { Car } from '../../../core/models/car.model';
 import { AdminService } from '../../../core/services/admin.service';
@@ -12,7 +13,7 @@ import { InrCurrencyPipe } from '../../../core/pipes/inr-currency.pipe';
 @Component({
   selector: 'app-admin-pending-cars',
   standalone: true,
-  imports: [CommonModule, LoadingSpinnerComponent, EmptyStateComponent, ConfirmDialogComponent, InrCurrencyPipe],
+  imports: [CommonModule, FormsModule, ReactiveFormsModule, LoadingSpinnerComponent, EmptyStateComponent, ConfirmDialogComponent, InrCurrencyPipe],
   template: `
     <div class="pending-page">
       <div class="page-head">
@@ -66,6 +67,7 @@ import { InrCurrencyPipe } from '../../../core/pipes/inr-currency.pipe';
               </div>
 
               <div class="queue-actions" (click)="$event.stopPropagation()">
+                <button class="btn btn-secondary queue-action" type="button" (click)="editCar(car, $event)">Edit</button>
                 <button class="btn btn-primary queue-action" type="button" (click)="approve(car, $event)">Approve</button>
                 <button class="btn btn-ghost queue-action queue-action--danger" type="button" (click)="reject(car, $event)">Reject</button>
               </div>
@@ -99,6 +101,56 @@ import { InrCurrencyPipe } from '../../../core/pipes/inr-currency.pipe';
           </div>
         </ng-container>
       </ng-container>
+
+      <!-- Edit Modal -->
+      <div class="modal-overlay" *ngIf="editingCar" (click)="cancelEdit()">
+        <div class="modal-content" (click)="$event.stopPropagation()">
+          <div class="modal-header">
+            <h2>Edit Car Listing</h2>
+            <button class="btn-icon" (click)="cancelEdit()">
+              <i class="ph ph-x"></i>
+            </button>
+          </div>
+          <form [formGroup]="editForm" (ngSubmit)="saveEdit()">
+            <div class="form-row">
+              <div class="form-group">
+                <label>Make</label>
+                <input type="text" formControlName="make" placeholder="Toyota">
+              </div>
+              <div class="form-group">
+                <label>Model</label>
+                <input type="text" formControlName="model" placeholder="Camry">
+              </div>
+            </div>
+            <div class="form-row">
+              <div class="form-group">
+                <label>Year</label>
+                <input type="number" formControlName="year" placeholder="2020">
+              </div>
+              <div class="form-group">
+                <label>Color</label>
+                <input type="text" formControlName="color" placeholder="White">
+              </div>
+            </div>
+            <div class="form-row">
+              <div class="form-group">
+                <label>Price (₹)</label>
+                <input type="number" formControlName="price" placeholder="500000">
+              </div>
+              <div class="form-group">
+                <label>Mileage (km)</label>
+                <input type="number" formControlName="mileage" placeholder="25000">
+              </div>
+            </div>
+            <div class="modal-actions">
+              <button type="button" class="btn btn-secondary" (click)="cancelEdit()">Cancel</button>
+              <button type="submit" class="btn btn-primary" [disabled]="!editForm.valid || saving">
+                {{ saving ? 'Saving...' : 'Save Changes' }}
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
     </div>
   `,
   styles: [`
@@ -137,6 +189,22 @@ import { InrCurrencyPipe } from '../../../core/pipes/inr-currency.pipe';
       .queue-preview__grid { grid-template-columns: 1fr 1fr; }
     }
     @media (max-width: 640px) { .queue-preview__grid { grid-template-columns: 1fr; } }
+
+    .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.7); display: grid; place-items: center; z-index: 1000; padding: 20px; }
+    .modal-content { background: var(--surface-1); border: 1px solid var(--hairline); border-radius: var(--radius-l); width: 100%; max-width: 600px; padding: 24px; max-height: 90vh; overflow-y: auto; }
+    .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+    .modal-header h2 { margin: 0; font-size: 20px; }
+    .btn-icon { width: 36px; height: 36px; border-radius: var(--radius-m); display: grid; place-items: center; background: transparent; border: 1px solid var(--hairline); color: var(--text-secondary); cursor: pointer; transition: all 0.15s; }
+    .btn-icon:hover { background: var(--surface-2); color: var(--text-primary); }
+    .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+    .form-group { margin-bottom: 16px; }
+    .form-group label { display: block; font-size: 13px; font-weight: 500; color: var(--text-secondary); margin-bottom: 6px; }
+    .form-group input { width: 100%; height: 44px; background: var(--surface-2); border: 1px solid var(--hairline); border-radius: var(--radius-m); padding: 0 14px; color: var(--text-primary); font: inherit; }
+    .form-group input:focus { outline: 2px solid var(--accent); outline-offset: -1px; }
+    .modal-actions { display: flex; gap: 12px; justify-content: flex-end; margin-top: 24px; }
+    .btn-secondary { background: transparent; color: var(--text-primary); border: 1px solid var(--hairline); }
+    .btn-secondary:hover { background: var(--surface-2); }
+    @media (max-width: 640px) { .form-row { grid-template-columns: 1fr; } }
   `]
 })
 export class AdminPendingCarsComponent implements OnInit {
@@ -145,17 +213,74 @@ export class AdminPendingCarsComponent implements OnInit {
   error = '';
   expandedId: number | null = null;
   skeletonRows = [0, 1, 2, 3];
+  editingCar: Car | null = null;
+  editForm!: FormGroup;
+  saving = false;
 
   constructor(
     private adminService: AdminService,
     private toast: ToastService,
-    private dialog: MatDialog
+    private dialog: MatDialog,
+    private fb: FormBuilder
   ) {}
 
   ngOnInit() {
+    this.buildForm();
     this.adminService.getPendingCars().subscribe({
       next: (cars) => { this.cars = cars; this.isLoading = false; },
       error: () => { this.error = 'Failed to load pending cars.'; this.isLoading = false; }
+    });
+  }
+
+  buildForm() {
+    this.editForm = this.fb.group({
+      make: ['', Validators.required],
+      model: ['', Validators.required],
+      year: ['', [Validators.required, Validators.min(1900), Validators.max(new Date().getFullYear() + 1)]],
+      color: ['', Validators.required],
+      price: ['', [Validators.required, Validators.min(0)]],
+      mileage: ['', [Validators.required, Validators.min(0)]]
+    });
+  }
+
+  editCar(car: Car, event?: MouseEvent) {
+    event?.stopPropagation();
+    this.editingCar = car;
+    this.editForm.patchValue({
+      make: car.make,
+      model: car.model,
+      year: car.year,
+      color: car.color,
+      price: car.price,
+      mileage: car.mileage
+    });
+  }
+
+  cancelEdit() {
+    this.editingCar = null;
+    this.editForm.reset();
+  }
+
+  saveEdit() {
+    if (!this.editingCar || !this.editForm.valid || this.saving) return;
+
+    this.saving = true;
+    const formData = this.editForm.value;
+
+    this.adminService.updateCar(this.editingCar.id, formData).subscribe({
+      next: (updated) => {
+        const idx = this.cars.findIndex(c => c.id === updated.id);
+        if (idx !== -1) {
+          this.cars[idx] = { ...this.cars[idx], ...updated };
+        }
+        this.saving = false;
+        this.cancelEdit();
+        this.toast.success('Car updated successfully');
+      },
+      error: (err) => {
+        this.toast.error(err?.error?.message || 'Failed to update car');
+        this.saving = false;
+      }
     });
   }
 

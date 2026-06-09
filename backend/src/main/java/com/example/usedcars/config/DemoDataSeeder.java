@@ -22,7 +22,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 @Component
 @ConditionalOnProperty(prefix = "app.demo", name = "seed-support-tickets", havingValue = "true")
 public class DemoDataSeeder implements CommandLineRunner {
-    private static final String DEMO_PASSWORD = "Demo@1234";
+    private static final String DEMO_PASSWORD = "Demo@12345";
     private static final String DEMO_ADMIN_PASSWORD = "Demo@1234x";
 
     private final UserRepository userRepository;
