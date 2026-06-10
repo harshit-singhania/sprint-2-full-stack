@@ -527,32 +527,31 @@ The class diagram illustrates the complete object-oriented design of TrustLot:
 
 ```mermaid
 erDiagram
-    APP_USER ||--o{ CAR : "lists"
-    APP_USER ||--o{ PURCHASE_ORDER : "buys"
-    APP_USER ||--o{ PURCHASE_ORDER : "sells"
-    APP_USER ||--o{ SUPPORT_TICKET : "creates"
-    APP_USER ||--o{ SELLER_REVIEW : "gives"
-    APP_USER ||--o{ FEEDBACK : "submits"
-    APP_USER ||--o{ WISHLIST_ITEM : "adds"
-    APP_USER ||--o{ RECENT_VIEW : "views"
+    APP_USER ||--o{ CAR : lists
+    APP_USER ||--o{ PURCHASE_ORDER : buys_sells
+    APP_USER ||--o{ SUPPORT_TICKET : creates
+    APP_USER ||--o{ SELLER_REVIEW : gives
+    APP_USER ||--o{ FEEDBACK : submits
+    APP_USER ||--o{ WISHLIST_ITEM : adds
+    APP_USER ||--o{ RECENT_VIEW : views
     
-    CAR ||--o{ PURCHASE_ORDER : "involves"
-    CAR ||--o{ WISHLIST_ITEM : "appears-in"
-    CAR ||--o{ RECENT_VIEW : "appears-in"
+    CAR ||--o{ PURCHASE_ORDER : involves
+    CAR ||--o{ WISHLIST_ITEM : appears_in
+    CAR ||--o{ RECENT_VIEW : appears_in
     
-    PURCHASE_ORDER ||--|| PAYMENT : "has"
-    PURCHASE_ORDER ||--o{ SUPPORT_TICKET : "relates-to"
+    PURCHASE_ORDER ||--|| PAYMENT : has
+    PURCHASE_ORDER ||--o{ SUPPORT_TICKET : relates_to
     
-    SUPPORT_TICKET ||--o{ TICKET_RESPONSE : "contains"
+    SUPPORT_TICKET ||--o{ TICKET_RESPONSE : contains
     
-    SELLER_REVIEW ||--|| APP_USER : "reviews"
+    SELLER_REVIEW ||--|| APP_USER : reviews
 
     APP_USER {
-        int id PK
-        string username UK
+        int id
+        string username
         string name
-        string phoneNumber UK
-        string email UK
+        string phoneNumber
+        string email
         string passwordHash
         string role
         timestamp createdAt
@@ -560,8 +559,8 @@ erDiagram
     }
 
     CAR {
-        int id PK
-        int sellerId FK
+        int id
+        int sellerId
         string make
         string model
         int year
@@ -584,18 +583,18 @@ erDiagram
     }
 
     PURCHASE_ORDER {
-        int id PK
-        int buyerId FK
-        int sellerId FK
-        int carId FK
-        int paymentId FK
+        int id
+        int buyerId
+        int sellerId
+        int carId
+        int paymentId
         string status
         boolean fraudAlert
         timestamp createdAt
     }
 
     PAYMENT {
-        string id PK
+        string id
         string status
         decimal amount
         string method
@@ -606,8 +605,8 @@ erDiagram
     }
 
     SUPPORT_TICKET {
-        int id PK
-        int userId FK
+        int id
+        int userId
         string subject
         string description
         string status
@@ -616,40 +615,40 @@ erDiagram
     }
 
     TICKET_RESPONSE {
-        int id PK
-        int ticketId FK
-        int senderId FK
+        int id
+        int ticketId
+        int senderId
         string message
         timestamp respondedAt
     }
 
     FEEDBACK {
-        int id PK
-        int userId FK
+        int id
+        int userId
         string message
         timestamp createdAt
     }
 
     SELLER_REVIEW {
-        int id PK
-        int reviewerId FK
-        int sellerId FK
+        int id
+        int reviewerId
+        int sellerId
         int rating
         string comment
         timestamp createdAt
     }
 
     WISHLIST_ITEM {
-        int id PK
-        int buyerId FK
-        int carId FK
+        int id
+        int buyerId
+        int carId
         timestamp addedAt
     }
 
     RECENT_VIEW {
-        int id PK
-        int userId FK
-        int carId FK
+        int id
+        int userId
+        int carId
         timestamp viewedAt
     }
 ```
