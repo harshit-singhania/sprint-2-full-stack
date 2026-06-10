@@ -1,0 +1,250 @@
+<div class="detail-page">
+
+  <!-- Loading skeleton -->
+  <div class="detail-skeleton" *ngIf="isLoading">
+    <app-loading-spinner variant="detail"></app-loading-spinner>
+  </div>
+
+  <!-- Error -->
+  <app-empty-state
+    *ngIf="!isLoading && error"
+    icon="ph ph-warning-circle"
+    heading="Car not found"
+    [body]="error"
+    ctaLabel="Back to browse"
+    ctaRoute="/browse"
+  ></app-empty-state>
+
+  <!-- Content -->
+  <ng-container *ngIf="!isLoading && car && !error">
+
+    <div class="breadcrumb">
+      <a routerLink="/browse">Browse</a>
+      <i class="ph ph-caret-right"></i>
+      <span>{{car.make}} {{car.model}}</span>
+    </div>
+
+    <div class="detail-layout">
+
+      <!-- Gallery (left) -->
+      <div class="gallery">
+        <!-- Main image — shows the selected thumb -->
+        <div class="gallery-main" (click)="openLightbox(activeThumb)">
+          <img
+            class="gallery-primary"
+            [src]="thumbnails[activeThumb]"
+            [alt]="car.make + ' ' + car.model"
+            loading="eager">
+          <div class="gallery-overlay">
+            <i class="ph ph-arrows-out"></i>
+          </div>
+        </div>
+        <!-- Thumbnail strip -->
+        <div class="gallery-strip">
+          <img
+            *ngFor="let thumb of thumbnails; let i = index"
+            class="gallery-thumb"
+            [class.gallery-thumb--active]="i === activeThumb"
+            [src]="thumb"
+            [alt]="car.make + ' thumb ' + (i+1)"
+            loading="lazy"
+            (click)="selectThumb(i)">
+        </div>
+      </div>
+
+      <!-- Purchase rail (right, sticky) -->
+      <aside class="purchase-rail surface-card">
+        <h1 class="rail-title">
+          <span class="mono">{{car.year}}</span> {{car.make}} {{car.model}}
+        </h1>
+        <p class="rail-price mono">{{car.price | inrCurrency}}</p>
+
+        <div class="rail-chips">
+          <app-status-chip [status]="car.approvalStatus"></app-status-chip>
+          <span class="avail-chip avail-chip--ok" *ngIf="car.available">Available</span>
+          <span class="avail-chip avail-chip--sold" *ngIf="!car.available">Sold</span>
+        </div>
+
+        <!-- Buy now -->
+        <button
+          class="btn btn-primary btn-full"
+          (click)="buyNow()"
+          [disabled]="!canBuy()"
+          [title]="buyDisabledReason"
+        >
+          {{BUY_NOW}}
+        </button>
+
+        <p class="rail-reason" *ngIf="buyDisabledReason">{{buyDisabledReason}}</p>
+
+        <!-- Secondary actions -->
+        <div class="rail-actions">
+          <button class="btn btn-ghost btn-full" (click)="toggleWishlist()">
+            <i [class]="inWishlist ? 'ph ph-heart-fill' : 'ph ph-heart'"></i>
+            {{inWishlist ? 'Saved' : 'Add to wishlist'}}
+          </button>
+          <button class="btn btn-ghost btn-full" (click)="sellerVisible = !sellerVisible">
+            <i class="ph ph-phone"></i>
+            Contact seller
+          </button>
+          <button class="btn btn-ghost btn-full" (click)="addToCompare()">
+            <i [class]="compareService.isSelected(car.id) ? 'ph ph-scales-fill' : 'ph ph-scales'"></i>
+            Compare
+          </button>
+        </div>
+
+        <!-- Seller info (revealed) -->
+        <div class="seller-reveal" *ngIf="sellerVisible">
+          <p class="seller-name">{{car.seller.name}}</p>
+          <p class="seller-phone mono">{{car.seller.phoneNumber}}</p>
+        </div>
+
+        <p class="rail-reassurance">
+          <i class="ph ph-lock-simple"></i>
+          Every listing reviewed before going live.
+        </p>
+      </aside>
+    </div>
+
+    <!-- Specs -->
+    <section class="specs-section">
+      <h2 class="h3 specs-heading">Specifications</h2>
+      <div class="specs-grid">
+        <div class="spec-card surface-card">
+          <span class="spec-label">Mileage</span>
+          <span class="spec-value mono">{{car.mileage | number}} km</span>
+        </div>
+        <div class="spec-card surface-card">
+          <span class="spec-label">Year</span>
+          <span class="spec-value mono">{{car.year}}</span>
+        </div>
+        <div class="spec-card surface-card">
+          <span class="spec-label">Color</span>
+          <div class="spec-color">
+            <span class="color-swatch" [style.background]="car.color.toLowerCase()"></span>
+            <span class="spec-value mono">{{car.color}}</span>
+          </div>
+        </div>
+        <div class="spec-card surface-card">
+          <span class="spec-label">Listed</span>
+          <span class="spec-value mono">{{car.createdAt | date:'dd MMM yyyy'}}</span>
+        </div>
+        <div class="spec-card surface-card">
+          <span class="spec-label">Views</span>
+          <span class="spec-value mono">{{car.viewCount | number}}</span>
+        </div>
+        <div class="spec-card surface-card">
+          <span class="spec-label">Status</span>
+          <span class="spec-value mono">{{car.approvalStatus | titlecase}}</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- Description -->
+    <section class="desc-section" *ngIf="car.description">
+      <h2 class="h3 specs-heading">About this car</h2>
+      <p class="body desc-body">{{car.description}}</p>
+    </section>
+
+    <!-- ── Seller Reviews ─────────────────────────────────── -->
+    <section class="reviews-section">
+      <div class="reviews-header">
+        <div class="reviews-title-row">
+          <h2 class="h3 specs-heading" style="margin:0">Seller Reviews</h2>
+
+          <!-- Average rating badge -->
+          <div class="avg-badge" *ngIf="!reviewsLoading && reviews.length > 0">
+            <div class="avg-stars">
+              <i *ngFor="let s of stars(5)"
+                 class="ph"
+                 [class.ph-star-fill]="starType(s, averageRating) === 'fill'"
+                 [class.ph-star-half]="starType(s, averageRating) === 'half'"
+                 [class.ph-star]="starType(s, averageRating) === 'empty'"
+                 [class.star-filled]="starType(s, averageRating) !== 'empty'">
+              </i>
+            </div>
+            <span class="avg-score mono">{{ averageRating | number:'1.1-1' }}</span>
+            <span class="avg-count">({{ reviews.length }} review{{ reviews.length !== 1 ? 's' : '' }})</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Loading -->
+      <div class="reviews-loading" *ngIf="reviewsLoading">
+        <app-loading-spinner variant="row"></app-loading-spinner>
+        <app-loading-spinner variant="row"></app-loading-spinner>
+      </div>
+
+      <!-- No reviews -->
+      <div class="reviews-empty" *ngIf="!reviewsLoading && reviews.length === 0">
+        <i class="ph ph-star"></i>
+        <span>No reviews yet for this seller.</span>
+      </div>
+
+      <!-- Review cards -->
+      <div class="reviews-grid" *ngIf="!reviewsLoading && reviews.length > 0">
+        <div class="review-card surface-card" *ngFor="let review of visibleReviews">
+          <div class="review-top">
+            <!-- Reviewer avatar + name -->
+            <div class="reviewer-info">
+              <div class="reviewer-avatar mono">
+                {{ (review.reviewer?.name || review.reviewer?.username || '?')[0].toUpperCase() }}
+              </div>
+              <div>
+                <div class="reviewer-name">{{ review.reviewer?.name || review.reviewer?.username }}</div>
+                <div class="review-date mono">{{ review.createdAt | date:'dd MMM yyyy' }}</div>
+              </div>
+            </div>
+            <!-- Star rating -->
+            <div class="review-stars">
+              <i *ngFor="let s of stars(5)"
+                 class="ph"
+                 [class.ph-star-fill]="s <= review.rating"
+                 [class.ph-star]="s > review.rating"
+                 [class.star-filled]="s <= review.rating">
+              </i>
+            </div>
+          </div>
+          <!-- Comment -->
+          <p class="review-comment" *ngIf="review.comment">{{ review.comment }}</p>
+          <p class="review-comment review-comment--empty" *ngIf="!review.comment">No comment left.</p>
+        </div>
+      </div>
+
+      <!-- Show more / less -->
+      <div class="reviews-toggle" *ngIf="!reviewsLoading && reviews.length > 3">
+        <button class="btn btn-ghost" type="button" (click)="showAllReviews = !showAllReviews">
+          <i class="ph" [class.ph-caret-down]="!showAllReviews" [class.ph-caret-up]="showAllReviews"></i>
+          {{ showAllReviews ? 'Show less' : 'Show all ' + reviews.length + ' reviews' }}
+        </button>
+      </div>
+    </section>
+
+    <!-- Mobile sticky bar -->
+    <div class="mobile-sticky-bar">
+      <span class="mobile-price mono">{{car.price | inrCurrency}}</span>
+      <button class="btn btn-primary" (click)="buyNow()" [disabled]="!canBuy()">
+        {{BUY_NOW}}
+      </button>
+    </div>
+
+  </ng-container>
+
+  <!-- Lightbox -->
+  <div class="lightbox" *ngIf="lightboxOpen" (click)="closeLightbox()">
+    <div class="lightbox-inner" (click)="$event.stopPropagation()">
+      <button class="lb-nav lb-prev" (click)="prevImage()" aria-label="Previous">
+        <i class="ph ph-arrow-left"></i>
+      </button>
+      <img class="lb-img" [src]="thumbnails[lightboxIndex]" [alt]="car?.make" loading="eager">
+      <button class="lb-nav lb-next" (click)="nextImage()" aria-label="Next">
+        <i class="ph ph-arrow-right"></i>
+      </button>
+      <button class="lb-close" (click)="closeLightbox()" aria-label="Close">
+        <i class="ph ph-x"></i>
+      </button>
+    </div>
+  </div>
+
+  <app-compare-tray></app-compare-tray>
+</div>

@@ -1,0 +1,175 @@
+import { Component, OnInit } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { ActivatedRoute, RouterModule } from '@angular/router';
+import { MatDialog, MatDialogModule } from '@angular/material/dialog';
+import { forkJoin, of } from 'rxjs';
+import { catchError } from 'rxjs/operators';
+import { Car } from '../../core/models/car.model';
+import { CarService } from '../../core/services/car.service';
+import { WishlistService } from '../../core/services/wishlist.service';
+import { AuthService } from '../../core/services/auth.service';
+import { ToastService } from '../../shared/components/toast/toast.service';
+import { ReviewService } from '../../core/services/review.service';
+import { SellerReview } from '../../core/models/review.model';
+import { StatusChipComponent } from '../../shared/components/status-chip/status-chip.component';
+import { LoadingSpinnerComponent } from '../../shared/components/loading-spinner/loading-spinner.component';
+import { EmptyStateComponent } from '../../shared/components/empty-state/empty-state.component';
+import { InrCurrencyPipe } from '../../core/pipes/inr-currency.pipe';
+import { PurchaseDialogComponent } from './purchase-dialog/purchase-dialog.component';
+import { CompareService } from '../compare/compare.service';
+import { CompareTrayComponent } from '../compare/compare-tray.component';
+import { getCarGalleryImages, getCarPrimaryImage } from '../../core/utils/car-images';
+
+@Component({
+  selector: 'app-car-detail',
+  standalone: true,
+  imports: [
+    CommonModule,
+    RouterModule,
+    MatDialogModule,
+    StatusChipComponent,
+    LoadingSpinnerComponent,
+    EmptyStateComponent,
+    InrCurrencyPipe,
+    CompareTrayComponent
+  ],
+  templateUrl: './car-detail.component.html',
+  styleUrl: './car-detail.component.scss'
+})
+export class CarDetailComponent implements OnInit {
+  readonly BUY_NOW = 'Buy now';
+
+  car: Car | null = null;
+  isLoading = true;
+  error = '';
+  inWishlist = false;
+  isOwnListing = false;
+  sellerVisible = false;
+  lightboxOpen = false;
+  lightboxIndex = 0;
+  activeThumb = 0;
+  readonly thumbnailCount = 4;
+
+  // Seller reviews
+  reviews: SellerReview[] = [];
+  averageRating = 0;
+  reviewsLoading = true;
+  showAllReviews = false;
+
+  constructor(
+    private route: ActivatedRoute,
+    private carService: CarService,
+    private wishlistService: WishlistService,
+    private auth: AuthService,
+    private toast: ToastService,
+    private dialog: MatDialog,
+    private reviewService: ReviewService,
+    public compareService: CompareService
+  ) {}
+
+  ngOnInit() {
+    const id = Number(this.route.snapshot.paramMap.get('id'));
+    this.carService.getCarById(id).subscribe({
+      next: (car) => {
+        this.car = car;
+        this.isOwnListing = car.seller.username === this.auth.getUsername();
+        this.isLoading = false;
+        this.loadSellerReviews(car.seller.id);
+      },
+      error: () => {
+        this.error = 'Car not found or failed to load.';
+        this.isLoading = false;
+      }
+    });
+    this.wishlistService.getWishlist().subscribe({
+      next: (cars) => { this.inWishlist = cars.some(c => c.id === id); },
+      error: () => {}
+    });
+  }
+
+  loadSellerReviews(sellerId: number) {
+    this.reviewsLoading = true;
+    forkJoin({
+      reviews: this.reviewService.getSellerReviews(sellerId).pipe(catchError(() => of([] as SellerReview[]))),
+      avg: this.reviewService.getSellerAverageRating(sellerId).pipe(catchError(() => of({ sellerId, averageRating: 0 })))
+    }).subscribe({
+      next: ({ reviews, avg }) => {
+        this.reviews = reviews;
+        this.averageRating = avg?.averageRating ?? 0;
+        this.reviewsLoading = false;
+      },
+      error: () => { this.reviewsLoading = false; }
+    });
+  }
+
+  get visibleReviews(): SellerReview[] {
+    return this.showAllReviews ? this.reviews : this.reviews.slice(0, 3);
+  }
+
+  stars(count: number): number[] {
+    return Array.from({ length: count }, (_, i) => i + 1);
+  }
+
+  starType(position: number, rating: number): 'fill' | 'half' | 'empty' {
+    if (rating >= position) return 'fill';
+    if (rating >= position - 0.5) return 'half';
+    return 'empty';
+  }
+
+  get thumbnails(): string[] {
+    if (!this.car) return [];
+    return getCarGalleryImages(this.car, this.thumbnailCount);
+  }
+
+  get carImage(): string {
+    if (!this.car) return '';
+    return getCarPrimaryImage(this.car);
+  }
+
+  openLightbox(idx: number) { this.lightboxIndex = idx; this.lightboxOpen = true; }
+  selectThumb(idx: number) { this.activeThumb = idx; }
+  closeLightbox() { this.lightboxOpen = false; }
+  prevImage() { this.lightboxIndex = (this.lightboxIndex - 1 + this.thumbnailCount) % this.thumbnailCount; }
+  nextImage() { this.lightboxIndex = (this.lightboxIndex + 1) % this.thumbnailCount; }
+
+  toggleWishlist() {
+    if (!this.car) return;
+    if (this.inWishlist) {
+      this.inWishlist = false;
+      this.wishlistService.removeFromWishlist(this.car.id).subscribe({
+        error: () => { this.inWishlist = true; this.toast.error('Failed to remove from wishlist'); }
+      });
+    } else {
+      this.inWishlist = true;
+      this.wishlistService.addToWishlist(this.car.id).subscribe({
+        next: () => this.toast.success('Added to wishlist'),
+        error: () => { this.inWishlist = false; this.toast.error('Failed to add to wishlist'); }
+      });
+    }
+  }
+
+  buyNow() {
+    if (!this.car) return;
+    this.dialog.open(PurchaseDialogComponent, { width: '520px', data: this.car });
+  }
+
+  addToCompare() {
+    if (!this.car) return;
+    this.compareService.toggle(this.car);
+    const action = this.compareService.isSelected(this.car.id) ? 'Added to compare' : 'Removed from compare';
+    this.toast.success(action);
+  }
+
+  canBuy(): boolean {
+    if (!this.car) return false;
+    return !this.isOwnListing && this.car.available && this.car.approvalStatus === 'APPROVED';
+  }
+
+  get buyDisabledReason(): string {
+    if (!this.car) return '';
+    if (this.isOwnListing) return 'You cannot purchase your own listing';
+    if (!this.car.available) return 'This car has already been sold';
+    if (this.car.approvalStatus !== 'APPROVED') return 'This listing is pending approval';
+    return '';
+  }
+}

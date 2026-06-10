@@ -1,0 +1,106 @@
+<div class="graphs-page">
+  <div class="page-head">
+    <div class="eyebrow mono">Analytics</div>
+    <h1 class="page-heading">Dashboard Graphs</h1>
+    <p class="body page-intro">Last 30 days of activity across orders, revenue and listings.</p>
+  </div>
+
+  <app-loading-spinner *ngIf="isLoading" variant="spinner"></app-loading-spinner>
+
+  <app-empty-state
+    *ngIf="!isLoading && error"
+    icon="ph ph-warning-circle"
+    [heading]="error"
+    body="Try refreshing the page.">
+  </app-empty-state>
+
+  <ng-container *ngIf="!isLoading && data && !error">
+
+    <!-- Summary tiles -->
+    <div class="summary-row">
+      <div class="summary-tile surface-card">
+        <i class="ph ph-shopping-bag tile-icon" style="color:var(--accent)"></i>
+        <div class="tile-val mono">{{ totalOrders }}</div>
+        <div class="tile-label">Orders (30d)</div>
+      </div>
+      <div class="summary-tile surface-card">
+        <i class="ph ph-currency-inr tile-icon" style="color:var(--success)"></i>
+        <div class="tile-val mono">{{ formatRevenue(totalRevenue) }}</div>
+        <div class="tile-label">Revenue (30d)</div>
+      </div>
+      <div class="summary-tile surface-card">
+        <i class="ph ph-car tile-icon" style="color:var(--warning)"></i>
+        <div class="tile-val mono">{{ totalListed }}</div>
+        <div class="tile-label">Cars Listed (30d)</div>
+      </div>
+    </div>
+
+    <!-- Line charts -->
+    <div class="chart-grid">
+
+      <div class="chart-card surface-card">
+        <div class="chart-title">
+          <i class="ph ph-trend-up" style="color:var(--accent)"></i>
+          Orders per day
+        </div>
+        <canvas #chartCanvas width="560" height="200" class="chart-canvas"></canvas>
+      </div>
+
+      <div class="chart-card surface-card">
+        <div class="chart-title">
+          <i class="ph ph-currency-inr" style="color:var(--success)"></i>
+          Revenue per day
+        </div>
+        <canvas #chartCanvas width="560" height="200" class="chart-canvas"></canvas>
+      </div>
+
+      <div class="chart-card surface-card chart-card--full">
+        <div class="chart-title">
+          <i class="ph ph-car" style="color:var(--warning)"></i>
+          Cars listed per day
+        </div>
+        <canvas #chartCanvas width="1140" height="200" class="chart-canvas chart-canvas--wide"></canvas>
+      </div>
+
+    </div>
+
+    <!-- Donut charts -->
+    <div class="donut-row">
+
+      <div class="donut-card surface-card">
+        <div class="chart-title">
+          <i class="ph ph-chart-pie-slice" style="color:var(--accent)"></i>
+          Order status breakdown
+        </div>
+        <div class="donut-layout">
+          <canvas #chartCanvas width="200" height="200" class="donut-canvas"></canvas>
+          <div class="legend">
+            <div class="legend-item" *ngFor="let item of donutLegend(data.orderStatusBreakdown)">
+              <span class="legend-dot" [style.background]="item.color"></span>
+              <span class="legend-label">{{ item.label }}</span>
+              <span class="legend-count mono">{{ item.count }}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="donut-card surface-card">
+        <div class="chart-title">
+          <i class="ph ph-chart-pie-slice" style="color:var(--warning)"></i>
+          Car approval breakdown
+        </div>
+        <div class="donut-layout">
+          <canvas #chartCanvas width="200" height="200" class="donut-canvas"></canvas>
+          <div class="legend">
+            <div class="legend-item" *ngFor="let item of donutLegend(data.carApprovalBreakdown)">
+              <span class="legend-dot" [style.background]="item.color"></span>
+              <span class="legend-label">{{ item.label }}</span>
+              <span class="legend-count mono">{{ item.count }}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </ng-container>
+</div>

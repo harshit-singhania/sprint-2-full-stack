@@ -1,0 +1,90 @@
+<div class="orders-page">
+  <div class="page-head">
+    <div>
+      <div class="eyebrow mono">Admin</div>
+      <h1 class="page-heading">All Orders</h1>
+      <p class="body page-intro">Browse every order. Download receipts for approved ones.</p>
+    </div>
+    <div class="toolbar">
+      <label class="search-shell" aria-label="Search orders">
+        <i class="ph ph-magnifying-glass"></i>
+        <input type="search" [(ngModel)]="search" (ngModelChange)="applyFilter()" placeholder="Search car, buyer, seller…">
+      </label>
+      <select class="status-select" [(ngModel)]="statusFilter" (ngModelChange)="applyFilter()">
+        <option *ngFor="let s of statuses" [value]="s.value">{{ s.label }}</option>
+      </select>
+    </div>
+  </div>
+
+  <ng-container *ngIf="isLoading">
+    <div class="surface-card table-shell">
+      <app-loading-spinner variant="row" *ngFor="let _ of skeletonRows"></app-loading-spinner>
+    </div>
+  </ng-container>
+
+  <ng-container *ngIf="!isLoading">
+    <app-empty-state *ngIf="error" icon="ph ph-warning-circle" [heading]="error" body="Refresh to try again."></app-empty-state>
+
+    <ng-container *ngIf="!error">
+      <app-empty-state *ngIf="filtered.length === 0" icon="ph ph-shopping-bag" heading="No orders found" body="Try a different search or filter."></app-empty-state>
+
+      <div class="surface-card table-shell" *ngIf="filtered.length > 0">
+        <table class="orders-table">
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Car</th>
+              <th>Buyer</th>
+              <th>Seller</th>
+              <th>Amount</th>
+              <th>Status</th>
+              <th>Date</th>
+              <th>Receipt</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let order of filtered">
+              <td class="mono id-cell">{{ order.id }}</td>
+              <td>
+                <div class="car-cell">
+                  <img class="car-thumb" [src]="carThumb(order)" [alt]="order.car?.make">
+                  <div>
+                    <div class="car-name">{{ order.car?.make }} {{ order.car?.model }}</div>
+                    <div class="mono car-year">{{ order.car?.year }}</div>
+                  </div>
+                </div>
+              </td>
+              <td>
+                <div class="person-cell">
+                  <span class="person-name">{{ order.buyer?.name }}</span>
+                  <span class="mono person-un">{{ order.buyer?.username }}</span>
+                </div>
+              </td>
+              <td>
+                <div class="person-cell">
+                  <span class="person-name">{{ order.seller?.name }}</span>
+                  <span class="mono person-un">{{ order.seller?.username }}</span>
+                </div>
+              </td>
+              <td class="mono amount-cell">{{ (order.payment?.amount ?? 0) | inrCurrency }}</td>
+              <td><app-status-chip [status]="order.status"></app-status-chip></td>
+              <td class="mono date-cell">{{ order.createdAt | date:'dd MMM yy' }}</td>
+              <td>
+                <button
+                  class="receipt-btn"
+                  [class.receipt-btn--disabled]="order.status !== 'APPROVED'"
+                  [disabled]="order.status !== 'APPROVED' || downloadingId === order.id"
+                  (click)="downloadReceipt(order)"
+                  [title]="order.status !== 'APPROVED' ? 'Available for approved orders only' : 'Download receipt'"
+                  aria-label="Download receipt">
+                  <span *ngIf="downloadingId === order.id" class="spinner-inline"></span>
+                  <i *ngIf="downloadingId !== order.id" class="ph ph-receipt"></i>
+                </button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </ng-container>
+  </ng-container>
+</div>

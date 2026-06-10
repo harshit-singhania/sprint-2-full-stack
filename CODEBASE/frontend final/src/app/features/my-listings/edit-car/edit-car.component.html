@@ -1,0 +1,192 @@
+<div class="page-container form-page">
+  <div class="form-shell">
+
+    <div class="form-top">
+      <h2 class="h2">Edit listing</h2>
+      <p class="body">Your changes will go back to admin review before going live.</p>
+    </div>
+
+    <div class="approval-notice">
+      <i class="ph ph-arrow-clockwise"></i>
+      <span>Saving changes resets the listing to <strong>Pending Admin Approval</strong>.</span>
+    </div>
+
+    <app-loading-spinner *ngIf="isLoadingCar"></app-loading-spinner>
+
+    <form *ngIf="!isLoadingCar" [formGroup]="form" (ngSubmit)="onSubmit()" novalidate>
+
+      <!-- ── Section 1: Basics ── -->
+      <section class="form-section">
+        <h3 class="h3 section-title">The basics</h3>
+        <div class="grid-two">
+
+          <div class="field">
+            <label class="field-label" for="ec-make">Make</label>
+            <input id="ec-make" class="field-input" formControlName="make"
+              [class.field-input--error]="(submitted || f['make'].touched) && f['make'].errors">
+            <span class="field-error" *ngIf="(submitted || f['make'].touched) && f['make'].errors?.['required']">Required.</span>
+          </div>
+
+          <div class="field">
+            <label class="field-label" for="ec-model">Model</label>
+            <input id="ec-model" class="field-input" formControlName="model"
+              [class.field-input--error]="(submitted || f['model'].touched) && f['model'].errors">
+            <span class="field-error" *ngIf="(submitted || f['model'].touched) && f['model'].errors?.['required']">Required.</span>
+          </div>
+
+          <div class="field">
+            <label class="field-label" for="ec-year">Year</label>
+            <input id="ec-year" class="field-input mono" type="number" formControlName="year" min="1900" max="2100"
+              [class.field-input--error]="(submitted || f['year'].touched) && f['year'].errors">
+            <span class="field-error" *ngIf="(submitted || f['year'].touched) && f['year'].errors?.['required']">Required.</span>
+            <span class="field-error" *ngIf="(submitted || f['year'].touched) && (f['year'].errors?.['min'] || f['year'].errors?.['max'])">Between 1900–2100.</span>
+          </div>
+
+          <div class="field">
+            <label class="field-label" for="ec-color">Color</label>
+            <div class="field-with-swatch">
+              <span class="color-swatch" [style.background]="colorPreview"></span>
+              <input id="ec-color" class="field-input" formControlName="color"
+                [class.field-input--error]="(submitted || f['color'].touched) && f['color'].errors">
+            </div>
+            <span class="field-error" *ngIf="(submitted || f['color'].touched) && f['color'].errors?.['required']">Required.</span>
+          </div>
+
+        </div>
+      </section>
+
+      <!-- ── Section 2: Vehicle details ── -->
+      <section class="form-section">
+        <h3 class="h3 section-title">Vehicle details</h3>
+        <div class="grid-two">
+
+          <div class="field">
+            <label class="field-label" for="ec-condition">Condition</label>
+            <div class="select-wrap">
+              <select id="ec-condition" class="field-input field-select" formControlName="condition">
+                <option *ngFor="let c of conditions" [value]="c">{{ c }}</option>
+              </select>
+              <i class="ph ph-caret-down select-caret"></i>
+            </div>
+          </div>
+
+          <div class="field">
+            <label class="field-label" for="ec-fuel">Fuel type</label>
+            <div class="select-wrap">
+              <select id="ec-fuel" class="field-input field-select" formControlName="fuelType">
+                <option *ngFor="let f of fuelTypes" [value]="f">{{ f }}</option>
+              </select>
+              <i class="ph ph-caret-down select-caret"></i>
+            </div>
+          </div>
+
+          <div class="field">
+            <label class="field-label" for="ec-trans">Transmission</label>
+            <div class="select-wrap">
+              <select id="ec-trans" class="field-input field-select" formControlName="transmission">
+                <option *ngFor="let t of transmissions" [value]="t">{{ t }}</option>
+              </select>
+              <i class="ph ph-caret-down select-caret"></i>
+            </div>
+          </div>
+
+          <div class="field">
+            <label class="field-label" for="ec-body">Body type</label>
+            <div class="select-wrap">
+              <select id="ec-body" class="field-input field-select" formControlName="bodyType">
+                <option *ngFor="let b of bodyTypes" [value]="b">{{ b }}</option>
+              </select>
+              <i class="ph ph-caret-down select-caret"></i>
+            </div>
+          </div>
+
+          <div class="field">
+            <label class="field-label" for="ec-owners">Number of owners</label>
+            <input id="ec-owners" class="field-input mono" type="number" formControlName="numberOfOwners" min="1"
+              [class.field-input--error]="(submitted || f['numberOfOwners'].touched) && f['numberOfOwners'].errors">
+            <span class="field-error" *ngIf="(submitted || f['numberOfOwners'].touched) && f['numberOfOwners'].errors?.['min']">Minimum 1.</span>
+          </div>
+
+          <div class="field">
+            <label class="field-label" for="ec-engine">Engine (cc) <span class="optional">optional</span></label>
+            <input id="ec-engine" class="field-input mono" type="number" formControlName="engineCc" min="50"
+              [class.field-input--error]="(submitted || f['engineCc'].touched) && f['engineCc'].errors">
+            <span class="field-error" *ngIf="(submitted || f['engineCc'].touched) && f['engineCc'].errors?.['min']">Minimum 50 cc.</span>
+          </div>
+
+        </div>
+      </section>
+
+      <!-- ── Section 3: Condition & price ── -->
+      <section class="form-section">
+        <h3 class="h3 section-title">Condition &amp; price</h3>
+        <div class="grid-two">
+
+          <div class="field">
+            <label class="field-label" for="ec-mileage">Mileage (km)</label>
+            <input id="ec-mileage" class="field-input mono" type="number" formControlName="mileage" min="0"
+              [class.field-input--error]="(submitted || f['mileage'].touched) && f['mileage'].errors">
+            <span class="field-error" *ngIf="(submitted || f['mileage'].touched) && f['mileage'].errors?.['required']">Required.</span>
+          </div>
+
+          <div class="field">
+            <label class="field-label" for="ec-price">Price (₹)</label>
+            <input id="ec-price" class="field-input mono" type="number" formControlName="price" min="1"
+              [class.field-input--error]="(submitted || f['price'].touched) && f['price'].errors">
+            <span class="field-error" *ngIf="(submitted || f['price'].touched) && f['price'].errors?.['required']">Required.</span>
+            <span class="field-error" *ngIf="(submitted || f['price'].touched) && f['price'].errors?.['min']">Must be > 0.</span>
+          </div>
+
+        </div>
+
+        <div class="toggles-row">
+          <div class="toggle-item">
+            <div>
+              <div class="field-label">Insured</div>
+              <div class="field-note">Valid insurance coverage.</div>
+            </div>
+            <button type="button" class="toggle" [class.toggle--on]="f['insured'].value"
+              (click)="toggle('insured')" role="switch" [attr.aria-checked]="!!f['insured'].value">
+              <span class="toggle-track"></span><span class="toggle-thumb"></span>
+            </button>
+          </div>
+          <div class="toggle-item">
+            <div>
+              <div class="field-label">PUC valid</div>
+              <div class="field-note">Pollution Under Control certificate is current.</div>
+            </div>
+            <button type="button" class="toggle" [class.toggle--on]="f['pucValid'].value"
+              (click)="toggle('pucValid')" role="switch" [attr.aria-checked]="!!f['pucValid'].value">
+              <span class="toggle-track"></span><span class="toggle-thumb"></span>
+            </button>
+          </div>
+        </div>
+      </section>
+
+      <!-- ── Section 4: Description ── -->
+      <section class="form-section">
+        <h3 class="h3 section-title">Description <span class="optional">optional</span></h3>
+        <div class="field">
+          <label class="field-label" for="ec-desc">About this car</label>
+          <textarea id="ec-desc" class="field-input field-textarea" rows="5" formControlName="description"
+            placeholder="Service history, modifications, reason for selling…"
+            [class.field-input--error]="(submitted || f['description'].touched) && f['description'].errors">
+          </textarea>
+          <div class="desc-footer">
+            <span class="field-error" *ngIf="(submitted || f['description'].touched) && f['description'].errors?.['maxlength']">Maximum 2000 characters.</span>
+            <span class="char-count mono" [class.char-count--warn]="descriptionLength > 1800">{{ descriptionLength }}/2000</span>
+          </div>
+        </div>
+      </section>
+
+      <div class="sticky-actions">
+        <a class="btn btn-ghost" routerLink="/my-listings">Cancel</a>
+        <button class="btn btn-primary" type="submit" [disabled]="isSaving">
+          <span *ngIf="isSaving" class="spinner-inline"></span>
+          {{ isSaving ? 'Saving…' : 'Save changes' }}
+        </button>
+      </div>
+
+    </form>
+  </div>
+</div>

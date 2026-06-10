@@ -1,0 +1,209 @@
+<div class="compare-page">
+  <a routerLink="/browse" class="back-link">
+    <i class="ph ph-arrow-left"></i> Back to browse
+  </a>
+
+  <!-- ── 0 cars ── -->
+  <div class="compare-empty" *ngIf="cars.length === 0">
+    <div class="empty-icon-wrap"><i class="ph ph-scales"></i></div>
+    <h2 class="empty-title">Pick two cars to compare</h2>
+    <p class="empty-sub">Browse listings and tap "Compare" on any car to add it here.</p>
+    <a routerLink="/browse" class="btn btn-primary">Browse cars</a>
+  </div>
+
+  <!-- ── 1 car ── -->
+  <div class="compare-empty" *ngIf="cars.length === 1">
+    <div class="empty-icon-wrap"><i class="ph ph-plus-circle"></i></div>
+    <h2 class="empty-title">Add one more car</h2>
+    <p class="empty-sub">
+      <strong>{{ cars[0].year }} {{ cars[0].make }} {{ cars[0].model }}</strong> is ready to compare.
+    </p>
+    <a routerLink="/browse" class="btn btn-primary">Find a second car</a>
+  </div>
+
+  <!-- ── 2 cars ── -->
+  <ng-container *ngIf="cars.length === 2">
+
+    <!-- ── Hero cards ── -->
+    <div class="hero-row">
+
+      <div class="hero-card surface-card" *ngFor="let car of cars; let ci = index">
+        <div class="hero-img-wrap">
+          <img class="hero-img" [src]="carImage(car)" [alt]="car.make + ' ' + car.model" loading="eager">
+          <div class="hero-gradient"></div>
+          <span class="ab-badge" [class.ab-badge--b]="ci === 1">
+            Car {{ ci === 0 ? 'A' : 'B' }}
+          </span>
+        </div>
+        <div class="hero-body">
+          <p class="hero-eyebrow mono">{{ car.year }} · {{ car.make }}</p>
+          <h2 class="hero-name">{{ car.model }}</h2>
+          <p class="hero-sub-line mono" *ngIf="car.bodyType || car.fuelType">
+            {{ car.bodyType }}{{ car.bodyType && car.fuelType ? ' · ' : '' }}{{ car.fuelType }}
+          </p>
+          <div class="hero-price mono">{{ car.price | inrCurrency }}</div>
+          <div class="hero-actions">
+            <a class="btn btn-primary btn-sm" [routerLink]="['/cars', car.id]">View listing</a>
+            <button class="btn btn-ghost btn-sm" type="button" (click)="compareService.remove(car.id)">
+              <i class="ph ph-x"></i> Remove
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- VS badge -->
+      <div class="vs-pill">VS</div>
+    </div>
+
+    <!-- ── Price delta callout ── -->
+    <div class="delta-bar surface-card">
+      <div class="delta-item">
+        <span class="delta-label">Price difference</span>
+        <span class="delta-val mono">{{ priceDiff() }}</span>
+      </div>
+      <div class="delta-item">
+        <span class="delta-label">Year gap</span>
+        <span class="delta-val mono">{{ cars[1].year - cars[0].year >= 0 ? '+' : '' }}{{ cars[1].year - cars[0].year }} yr</span>
+      </div>
+      <div class="delta-item">
+        <span class="delta-label">Mileage gap</span>
+        <span class="delta-val mono">{{ (cars[1].mileage - cars[0].mileage).toLocaleString('en-IN') }} km</span>
+      </div>
+    </div>
+
+    <!-- ── Full spec table ── -->
+    <div class="spec-table">
+
+      <!-- Sticky column header -->
+      <div class="spec-col-header">
+        <div class="col-spec-label">Specification</div>
+        <div class="col-cars">
+          <div class="col-car-label" *ngFor="let car of cars; let ci = index">
+            <span class="ab-dot" [class.ab-dot--b]="ci === 1">{{ ci === 0 ? 'A' : 'B' }}</span>
+            {{ car.make }} {{ car.model }}
+          </div>
+        </div>
+      </div>
+
+      <!-- Groups -->
+      <ng-container *ngFor="let group of specGroups">
+
+        <!-- Group header -->
+        <div class="group-header">
+          <i class="ph {{ group.icon }}"></i>
+          {{ group.title }}
+        </div>
+
+        <!-- Rows -->
+        <div class="spec-row" *ngFor="let spec of group.rows; let ri = index"
+             [class.spec-row--alt]="ri % 2 === 1">
+
+          <div class="spec-label-cell">{{ spec.label }}</div>
+
+          <div class="spec-value-cells">
+            <div class="spec-cell"
+                 *ngFor="let car of cars; let ci = index"
+                 [class.cell--win]="isBetter(ci, spec)"
+                 [class.cell--lose]="isWorse(ci, spec)">
+
+              <!-- Boolean field -->
+              <ng-container *ngIf="spec.isBool">
+                <span class="bool-chip" [class.bool-chip--yes]="boolVal(car, spec) === true"
+                      [class.bool-chip--no]="boolVal(car, spec) === false">
+                  <i class="ph" [class.ph-check-circle-fill]="boolVal(car, spec) === true"
+                     [class.ph-x-circle]="boolVal(car, spec) === false"
+                     [class.ph-minus-circle]="boolVal(car, spec) === null"></i>
+                  {{ boolVal(car, spec) === true ? 'Yes' : boolVal(car, spec) === false ? 'No' : '—' }}
+                </span>
+              </ng-container>
+
+              <!-- Color field -->
+              <ng-container *ngIf="spec.isColor">
+                <div class="color-row">
+                  <span class="color-swatch" [style.background]="colorToHex(car[spec.key])"></span>
+                  <span class="spec-val">{{ car[spec.key] || '—' }}</span>
+                </div>
+              </ng-container>
+
+              <!-- Text / plain field -->
+              <ng-container *ngIf="spec.isText && !spec.isColor && !spec.isBool">
+                <span class="spec-val spec-val--plain">{{ formatSpec(car, spec) }}</span>
+              </ng-container>
+
+              <!-- Numeric / comparable field -->
+              <ng-container *ngIf="!spec.isText && !spec.isColor && !spec.isBool">
+                <div class="numeric-row">
+                  <span class="spec-val" [class.spec-val--win]="isBetter(ci, spec)">
+                    {{ formatSpec(car, spec) }}
+                  </span>
+                  <span class="win-chip" *ngIf="isBetter(ci, spec)">
+                    <i class="ph ph-check-circle-fill"></i> Better
+                  </span>
+                </div>
+                <!-- Progress bar -->
+                <div class="bar-track" *ngIf="isNumericSpec(spec)">
+                  <div class="bar-fill"
+                       [style.width.%]="getBarWidth(ci, spec)"
+                       [class.bar-fill--win]="isBetter(ci, spec)"
+                       [class.bar-fill--lose]="isWorse(ci, spec)">
+                  </div>
+                </div>
+              </ng-container>
+
+            </div>
+          </div>
+        </div>
+
+      </ng-container>
+    </div>
+
+    <!-- ── Description comparison ── -->
+    <div class="desc-compare surface-card" *ngIf="cars[0].description || cars[1].description">
+      <div class="desc-header">
+        <i class="ph ph-text-align-left"></i>
+        Seller description
+      </div>
+      <div class="desc-cells">
+        <div class="desc-cell" *ngFor="let car of cars; let ci = index">
+          <div class="desc-car-name">
+            <span class="ab-dot" [class.ab-dot--b]="ci === 1">{{ ci === 0 ? 'A' : 'B' }}</span>
+            {{ car.make }} {{ car.model }}
+          </div>
+          <p class="desc-text" *ngIf="car.description">{{ car.description }}</p>
+          <p class="desc-text desc-text--empty" *ngIf="!car.description">No description provided.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── Verdict ── -->
+    <div class="verdict surface-card">
+      <div class="verdict-heading">
+        <i class="ph ph-trophy"></i>
+        Overall verdict
+      </div>
+      <div class="verdict-cells">
+        <div class="verdict-cell" *ngFor="let car of cars; let ci = index"
+             [class.verdict-cell--winner]="getWinCount(ci) > getWinCount(1 - ci)">
+          <div class="verdict-car">
+            <span class="ab-dot" [class.ab-dot--b]="ci === 1">{{ ci === 0 ? 'A' : 'B' }}</span>
+            <span>{{ car.make }} {{ car.model }}</span>
+          </div>
+          <div class="verdict-score mono">
+            {{ getWinCount(ci) }}<span class="verdict-total">/{{ totalRows }}</span>
+          </div>
+          <div class="verdict-tag"
+               [class.verdict-tag--lead]="getWinCount(ci) > getWinCount(1 - ci)"
+               [class.verdict-tag--tie]="getWinCount(ci) === getWinCount(1 - ci)">
+            <i class="ph ph-trophy-fill" *ngIf="getWinCount(ci) > getWinCount(1 - ci)"></i>
+            <i class="ph ph-equals" *ngIf="getWinCount(ci) === getWinCount(1 - ci)"></i>
+            <i class="ph ph-arrow-down" *ngIf="getWinCount(ci) < getWinCount(1 - ci)"></i>
+            {{ getWinCount(ci) > getWinCount(1 - ci) ? 'Recommended' :
+               getWinCount(ci) === getWinCount(1 - ci) ? 'Tied' : 'Runner-up' }}
+          </div>
+        </div>
+      </div>
+      <p class="verdict-note">Based on {{ totalRows }} comparable data points (price, year, mileage, owners, engine).</p>
+    </div>
+
+  </ng-container>
+</div>

@@ -1,0 +1,246 @@
+<div class="page-container order-detail">
+  <a routerLink="/my-orders" class="back-link">
+    <i class="ph ph-arrow-left"></i> Back to orders
+  </a>
+
+  <app-loading-spinner *ngIf="isLoading"></app-loading-spinner>
+
+  <app-empty-state
+    *ngIf="!isLoading && error"
+    icon="ph ph-warning-circle"
+    title="Not found"
+    [message]="error"
+    ctaLabel="Back to orders"
+    ctaRoute="/my-orders">
+  </app-empty-state>
+
+  <ng-container *ngIf="!isLoading && order && !error">
+
+    <!-- Fraud alert -->
+    <div class="fraud-banner" *ngIf="order.fraudAlert">
+      <i class="ph ph-warning"></i>
+      <span><strong>Fraud alert:</strong> This transaction has been flagged for suspicious activity.</span>
+    </div>
+
+    <!-- Header -->
+    <div class="order-header">
+      <div>
+        <h2 class="h2">Order #{{ order.id }}</h2>
+        <p class="order-date mono">{{ order.createdAt | date:'dd MMM yyyy, HH:mm' }}</p>
+      </div>
+      <div class="header-right">
+        <app-status-chip [status]="order.status"></app-status-chip>
+        <button
+          class="btn btn-ghost receipt-btn"
+          *ngIf="canDownloadReceipt"
+          (click)="downloadReceipt()"
+          [disabled]="isDownloadingReceipt"
+          title="Download receipt">
+          <span *ngIf="isDownloadingReceipt" class="spinner-inline"></span>
+          <i *ngIf="!isDownloadingReceipt" class="ph ph-receipt"></i>
+          {{ isDownloadingReceipt ? 'Generating…' : 'Receipt' }}
+        </button>
+      </div>
+    </div>
+
+    <div class="detail-layout">
+
+      <!-- Vertical stepper -->
+      <div class="surface-card stepper-card">
+        <h3 class="h3 stepper-heading">Progress</h3>
+        <div class="stepper">
+          <div
+            *ngFor="let step of steps; let last = last"
+            class="step"
+            [class.step--done]="step.state === 'done'"
+            [class.step--active]="step.state === 'active'"
+            [class.step--upcoming]="step.state === 'upcoming'"
+            [class.step--danger]="step.state === 'danger'">
+            <div class="step-track">
+              <div class="step-node">
+                <i *ngIf="step.state === 'done'" class="ph ph-check-circle step-icon"></i>
+                <i *ngIf="step.state === 'danger'" class="ph ph-x-circle step-icon"></i>
+                <span *ngIf="step.state === 'active'" class="step-pulse"></span>
+                <span *ngIf="step.state === 'upcoming'" class="step-dot"></span>
+              </div>
+              <div *ngIf="!last" class="step-line"></div>
+            </div>
+            <div class="step-content">
+              <div class="step-label">{{ step.label }}</div>
+              <div *ngIf="step.sub" class="step-sub mono">{{ step.sub }}</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Panels -->
+      <div class="panels">
+
+        <!-- Car summary -->
+        <div class="surface-card panel">
+          <h3 class="h3 panel-title">Vehicle</h3>
+          <div class="car-summary">
+            <img class="car-thumb" [src]="carThumb" [alt]="order.car?.make + ' ' + order.car?.model">
+            <div>
+              <div class="h3">{{ order.car?.make }} {{ order.car?.model }}</div>
+              <div class="mono text-secondary">{{ order.car?.year }} · {{ order.car?.color }}</div>
+              <div class="mono text-secondary">{{ order.car?.mileage | number }} km</div>
+            </div>
+          </div>
+          <div class="panel-row">
+            <span class="panel-label">Price</span>
+            <span class="mono">{{ (order.payment?.amount ?? order.car?.price ?? 0) | inrCurrency }}</span>
+          </div>
+        </div>
+
+        <!-- Parties -->
+        <div class="surface-card panel">
+          <h3 class="h3 panel-title">Parties</h3>
+          <div class="party">
+            <div class="party-header">
+              <span class="party-role">Buyer</span>
+              <span *ngIf="isBuyer" class="you-tag">You</span>
+            </div>
+            <div class="panel-row">
+              <span class="panel-label">Name</span>
+              <span>{{ order.buyer?.name || order.buyer?.username }}</span>
+            </div>
+            <div class="panel-row">
+              <span class="panel-label">Phone</span>
+              <span class="mono">{{ order.buyer?.phoneNumber }}</span>
+            </div>
+          </div>
+          <div class="party-divider"></div>
+          <div class="party">
+            <div class="party-header">
+              <span class="party-role">Seller</span>
+              <span *ngIf="isSeller" class="you-tag">You</span>
+            </div>
+            <div class="panel-row">
+              <span class="panel-label">Name</span>
+              <span>{{ order.seller?.name || order.seller?.username }}</span>
+            </div>
+            <div class="panel-row">
+              <span class="panel-label">Phone</span>
+              <span class="mono">{{ order.seller?.phoneNumber }}</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Payment -->
+        <div class="surface-card panel">
+          <h3 class="h3 panel-title">
+            Payment
+            <span *ngIf="order.fraudAlert" class="fraud-badge">
+              <i class="ph ph-warning"></i> Flagged
+            </span>
+          </h3>
+          <div class="panel-row">
+            <span class="panel-label">Amount</span>
+            <span class="mono">{{ (order.payment?.amount ?? 0) | inrCurrency }}</span>
+          </div>
+          <div class="panel-row">
+            <span class="panel-label">Method</span>
+            <span>{{ order.payment?.method }}</span>
+          </div>
+          <div class="panel-row">
+            <span class="panel-label">Status</span>
+            <app-status-chip [status]="order.payment?.status ?? ''"></app-status-chip>
+          </div>
+          <div class="panel-row" *ngIf="order.payment?.gatewayTransactionId">
+            <span class="panel-label">Transaction ID</span>
+            <span class="mono token">{{ order.payment?.gatewayTransactionId }}</span>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- Seller actions -->
+    <div class="surface-card seller-action-card" *ngIf="canActAsSeller">
+      <div class="seller-action-header">
+        <h3 class="h3">Action required</h3>
+        <p class="body text-secondary">Admin has approved this order. Please confirm or reject the sale.</p>
+      </div>
+      <div class="seller-action-btns">
+        <button class="btn btn-primary" [disabled]="isApproving || isRejecting" (click)="approveSale()">
+          <span *ngIf="isApproving" class="spinner-inline"></span>
+          {{ isApproving ? 'Approving…' : 'Approve sale' }}
+        </button>
+        <button class="btn btn-ghost danger-hover" [disabled]="isApproving || isRejecting" (click)="rejectSale()">
+          <span *ngIf="isRejecting" class="spinner-inline"></span>
+          {{ isRejecting ? 'Rejecting…' : 'Reject sale' }}
+        </button>
+      </div>
+    </div>
+
+    <!-- Seller Review (buyer only, approved orders) -->
+    <!-- Info: show why review is unavailable when user is buyer but order not approved -->
+    <div class="surface-card review-unavailable"
+         *ngIf="isBuyer && !canReview && order.status !== 'REJECTED' && order.status !== 'CANCELLED'">
+      <i class="ph ph-star"></i>
+      <span>You can rate the seller once the order is fully <strong>Approved</strong>.</span>
+    </div>
+
+    <div class="surface-card review-card" *ngIf="canReview">
+      <div class="review-header">
+        <div>
+          <h3 class="h3">Rate the seller</h3>
+          <p class="body text-secondary" style="margin:6px 0 0">
+            Share your experience with <strong>{{ order.seller?.name }}</strong>.
+          </p>
+        </div>
+        <button class="btn btn-ghost edit-review-btn" *ngIf="reviewSubmitted" (click)="editReview()">
+          <i class="ph ph-pencil"></i> Edit
+        </button>
+      </div>
+
+      <!-- Submitted view -->
+      <div class="review-submitted" *ngIf="reviewSubmitted && existingReview">
+        <div class="star-row">
+          <i *ngFor="let s of stars(5)" class="ph"
+             [class.ph-star-fill]="s <= existingReview.rating"
+             [class.ph-star]="s > existingReview.rating"
+             [class.star--filled]="s <= existingReview.rating"></i>
+        </div>
+        <p class="review-comment" *ngIf="existingReview.comment">{{ existingReview.comment }}</p>
+        <p class="review-meta mono">Submitted {{ existingReview.createdAt | date:'dd MMM yyyy' }}</p>
+      </div>
+
+      <!-- Form -->
+      <form [formGroup]="reviewForm" (ngSubmit)="submitReview()" class="review-form" *ngIf="!reviewSubmitted">
+        <div class="star-picker">
+          <i *ngFor="let s of stars(5)"
+             class="ph star-pick"
+             [class.ph-star-fill]="s <= (hoverRating || currentRating)"
+             [class.ph-star]="s > (hoverRating || currentRating)"
+             [class.star--filled]="s <= (hoverRating || currentRating)"
+             (mouseenter)="hoverRating = s"
+             (mouseleave)="hoverRating = 0"
+             (click)="setRating(s)"
+             [attr.aria-label]="s + ' star'">
+          </i>
+          <span class="star-hint" *ngIf="currentRating === 0">Tap to rate</span>
+          <span class="star-hint star-hint--rated" *ngIf="currentRating > 0">{{ currentRating }}/5</span>
+        </div>
+
+        <div class="review-textarea-wrap">
+          <textarea
+            class="review-textarea"
+            formControlName="comment"
+            rows="3"
+            placeholder="Describe your experience (optional, max 1000 chars)…">
+          </textarea>
+          <span class="char-count mono">{{ (reviewForm.value.comment?.length || 0) }}/1000</span>
+        </div>
+
+        <button class="btn btn-primary" type="submit"
+                [disabled]="isSubmittingReview || currentRating === 0">
+          <span *ngIf="isSubmittingReview" class="spinner-inline"></span>
+          {{ isSubmittingReview ? 'Submitting…' : (existingReview ? 'Update review' : 'Submit review') }}
+        </button>
+      </form>
+    </div>
+
+  </ng-container>
+</div>
