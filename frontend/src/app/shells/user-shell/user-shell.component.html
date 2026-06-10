@@ -1,0 +1,157 @@
+<!-- Top bar: frosted, sticky, 64px -->
+<header class="top-bar" role="banner">
+  <!-- Left: wordmark -->
+  <a class="wordmark" routerLink="/browse" aria-label="Carbon Market home">Carbon Market</a>
+
+  <!-- Center/right nav (desktop) -->
+  <nav class="nav-links" aria-label="Main navigation">
+    <a routerLink="/browse"
+       routerLinkActive="nav-active"
+       [routerLinkActiveOptions]="{exact:false}"
+       class="nav-link">Car Listing</a>
+
+    <a routerLink="/wishlist"
+       routerLinkActive="nav-active"
+       class="nav-link nav-link--wishlist">
+      Wishlist
+    </a>
+
+    <a routerLink="/my-listings"
+       routerLinkActive="nav-active"
+       class="nav-link">My Listings</a>
+
+    <a routerLink="/my-orders"
+       routerLinkActive="nav-active"
+       class="nav-link">My Orders</a>
+
+    <a routerLink="/tickets"
+       routerLinkActive="nav-active"
+       class="nav-link">Support</a>
+  </nav>
+
+  <!-- Account: avatar + menu -->
+  <div class="nav-account">
+    <button class="avatar-btn"
+            [matMenuTriggerFor]="accountMenu"
+            aria-label="Account menu"
+            aria-haspopup="true">
+      <span class="avatar-initials mono">{{ initials }}</span>
+    </button>
+
+    <mat-menu #accountMenu="matMenu" class="account-menu">
+      <button mat-menu-item (click)="logout()">
+        <i class="ph ph-sign-out" aria-hidden="true"></i>
+        <span>Logout</span>
+      </button>
+    </mat-menu>
+  </div>
+
+  <!-- Hamburger (mobile) -->
+  <button class="hamburger-btn"
+          (click)="toggleMobileNav()"
+          aria-label="Toggle navigation"
+          [attr.aria-expanded]="mobileNavOpen">
+    <i class="ph ph-list" aria-hidden="true"></i>
+  </button>
+</header>
+
+<!-- Mobile nav overlay -->
+<div class="mobile-nav-overlay"
+     [class.open]="mobileNavOpen"
+     (click)="closeMobileNav()"
+     aria-hidden="true"></div>
+
+<!-- Mobile nav panel (right-side sheet) -->
+<nav class="mobile-nav-panel"
+     [class.open]="mobileNavOpen"
+     aria-label="Mobile navigation"
+     role="navigation">
+  <div class="mobile-nav-header">
+    <span class="wordmark">Carbon Market</span>
+    <button class="close-btn" (click)="closeMobileNav()" aria-label="Close navigation">
+      <i class="ph ph-x" aria-hidden="true"></i>
+    </button>
+  </div>
+
+  <div class="mobile-nav-links">
+    <a routerLink="/browse"
+       routerLinkActive="mobile-nav-active"
+       class="mobile-nav-link"
+       (click)="closeMobileNav()">
+      <i class="ph ph-magnifying-glass" aria-hidden="true"></i>
+      Car Listing
+    </a>
+
+    <a routerLink="/wishlist"
+       routerLinkActive="mobile-nav-active"
+       class="mobile-nav-link"
+       (click)="closeMobileNav()">
+      <i class="ph ph-heart" aria-hidden="true"></i>
+      Wishlist
+    </a>
+
+    <a routerLink="/my-listings"
+       routerLinkActive="mobile-nav-active"
+       class="mobile-nav-link"
+       (click)="closeMobileNav()">
+      <i class="ph ph-car" aria-hidden="true"></i>
+      My Listings
+    </a>
+
+    <a routerLink="/my-orders"
+       routerLinkActive="mobile-nav-active"
+       class="mobile-nav-link"
+       (click)="closeMobileNav()">
+      <i class="ph ph-receipt" aria-hidden="true"></i>
+      My Orders
+    </a>
+
+    <a routerLink="/tickets"
+       routerLinkActive="mobile-nav-active"
+       class="mobile-nav-link"
+       (click)="closeMobileNav()">
+      <i class="ph ph-lifebuoy" aria-hidden="true"></i>
+      Support
+    </a>
+
+    <div class="mobile-nav-divider" role="separator"></div>
+
+    <button class="mobile-nav-link mobile-nav-logout" (click)="logout(); closeMobileNav()">
+      <i class="ph ph-sign-out" aria-hidden="true"></i>
+      Logout
+    </button>
+  </div>
+</nav>
+
+<!-- Page content -->
+<div class="page">
+  <router-outlet></router-outlet>
+
+  <!-- Feedback FAB -->
+  <button class="fab-feedback" (click)="openFeedback()" aria-label="Give Feedback">
+    <i class="ph ph-chat-circle-dots" aria-hidden="true"></i>
+  </button>
+
+  <!-- Compare tray (global, position:fixed) -->
+  <app-compare-tray></app-compare-tray>
+</div>
+
+<!-- Footer -->
+<footer class="site-footer">
+  <span class="footer-brand">Carbon Market</span>
+  <div class="footer-socials">
+    <a href="https://linkedin.com" target="_blank" rel="noopener" aria-label="LinkedIn">
+      <i class="ph ph-linkedin-logo"></i>
+    </a>
+    <a href="https://instagram.com" target="_blank" rel="noopener" aria-label="Instagram">
+      <i class="ph ph-instagram-logo"></i>
+    </a>
+    <a href="https://facebook.com" target="_blank" rel="noopener" aria-label="Facebook">
+      <i class="ph ph-facebook-logo"></i>
+    </a>
+    <a href="https://twitter.com" target="_blank" rel="noopener" aria-label="Twitter / X">
+      <i class="ph ph-x-logo"></i>
+    </a>
+  </div>
+  <span class="footer-copy mono">© 2026 Carbon Market</span>
+</footer>
