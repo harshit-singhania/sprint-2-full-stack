@@ -1,8 +1,0 @@
-export interface User {
-  id: number;
-  name: string;
-  username: string;
-  email: string;
-  phoneNumber: string;
-  role: 'USER' | 'ADMIN';
-}
