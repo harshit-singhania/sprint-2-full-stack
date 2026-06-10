@@ -1,0 +1,22 @@
+# Kiro IDE files
+.kiro/
+
+# Local environment and secrets
+.env
+.env.current
+.env.current.md
+.env.intellij
+.env.eclipse
+.env.local
+.env.*.local
+
+# Runtime logs
+*.log
+log.txt
+derby.log
+
+# Local Derby database
+usedcarsdb/
+
+# Build output
+target/
