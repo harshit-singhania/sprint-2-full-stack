@@ -1,4 +1,4 @@
-# TrustLot System Diagrams
+# Carbon Marketplace System Diagrams
 
 ## 1. Entity-Relationship (ER) Diagram
 
@@ -139,7 +139,7 @@ erDiagram
 graph TB
     User["👤 User<br/>(Buyer/Seller)"]
     Admin["👮 Admin<br/>(Moderator)"]
-    System["🔷 TrustLot<br/>System"]
+    System["🔷 Carbon Marketplace<br/>System"]
     PaymentGW["💳 Payment<br/>Gateway"]
     EmailService["📧 Email<br/>Service"]
     Database["🗄️ Database<br/>(MySQL/Derby)"]
@@ -461,7 +461,7 @@ graph TB
 ### DFD Level 0
 - **Context Diagram:** Shows system boundary with external actors
 - **External Entities:** Users, Admin, Payment Gateway, Email Service
-- **System:** Central TrustLot system processing all transactions
+- **System:** Central Carbon Marketplace system processing all transactions
 
 ### DFD Level 1 - User & Car Management
 - **Authentication Flow:** User registration → Auth Service → Session Management

@@ -1,9 +1,9 @@
-# TrustLot Used Car Marketplace
+# Carbon Marketplace Used Car Marketplace
 ## Complete Code Documentation
 
 **Version:** 1.0  
 **Date:** June 10, 2026  
-**Project:** TrustLot Full-Stack Used Car Buy-and-Sell Marketplace
+**Project:** Carbon Marketplace Full-Stack Used Car Buy-and-Sell Marketplace
 
 ---
 
@@ -28,7 +28,7 @@
 
 ### 1.1 Purpose
 
-This Code Documentation provides comprehensive technical documentation for the TrustLot Used Car Marketplace platform. It serves as a reference guide for understanding the system architecture, design patterns, implementation details, and operational aspects of the application. The document bridges the gap between functional requirements and actual implementation, providing developers, architects, and maintainers with the necessary information to understand, extend, and maintain the codebase.
+This Code Documentation provides comprehensive technical documentation for the Carbon Marketplace Used Car Marketplace platform. It serves as a reference guide for understanding the system architecture, design patterns, implementation details, and operational aspects of the application. The document bridges the gap between functional requirements and actual implementation, providing developers, architects, and maintainers with the necessary information to understand, extend, and maintain the codebase.
 
 ### 1.2 Scope
 
@@ -55,7 +55,7 @@ This documentation covers:
 
 ### 2.1 Architectural Overview
 
-TrustLot follows a **Layered Hexagonal Architecture** pattern:
+Carbon Marketplace follows a **Layered Hexagonal Architecture** pattern:
 
 ```
 ┌─────────────────────────────────────┐
@@ -511,7 +511,7 @@ classDiagram
 
 ### 3.2.1 UML Class Diagram Explanation
 
-The class diagram illustrates the complete object-oriented design of TrustLot:
+The class diagram illustrates the complete object-oriented design of Carbon Marketplace:
 
 **Entity Classes:** `AppUser`, `Car`, `PurchaseOrder`, `Payment`, etc., represent database entities with attributes and behaviors. Each entity maps to a database table.
 
@@ -1186,7 +1186,7 @@ public class GlobalExceptionHandler {
 
 ## 12. Conclusion
 
-TrustLot represents a well-architected, enterprise-grade used car marketplace platform. The implementation demonstrates solid software engineering principles:
+Carbon Marketplace represents a well-architected, enterprise-grade used car marketplace platform. The implementation demonstrates solid software engineering principles:
 
 - **Clear separation of concerns** through layered architecture
 - **Strong data integrity** with proper constraints and transactions

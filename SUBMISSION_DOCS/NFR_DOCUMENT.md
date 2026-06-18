@@ -1,9 +1,9 @@
 # Non-Functional Requirements Document
-## TrustLot Used Car Marketplace Platform
+## Carbon Marketplace Used Car Marketplace Platform
 
 **Version:** 1.0  
 **Date:** June 10, 2026  
-**Project:** TrustLot - Full-Stack Used Car Buy-and-Sell Marketplace  
+**Project:** Carbon Marketplace - Full-Stack Used Car Buy-and-Sell Marketplace  
 **Document Type:** Non-Functional Requirements Specification
 
 ---
@@ -30,11 +30,11 @@
 
 ### 1.1 Purpose
 
-This Non-Functional Requirements (NFR) document specifies the quality attributes, performance benchmarks, security standards, and operational constraints for the TrustLot used car marketplace platform. It complements the functional requirements by defining how the system should behave in terms of performance, reliability, security, and other quality characteristics essential for enterprise-grade operations.
+This Non-Functional Requirements (NFR) document specifies the quality attributes, performance benchmarks, security standards, and operational constraints for the Carbon Marketplace used car marketplace platform. It complements the functional requirements by defining how the system should behave in terms of performance, reliability, security, and other quality characteristics essential for enterprise-grade operations.
 
 ### 1.2 Scope
 
-This document applies to all components of the TrustLot platform including:
+This document applies to all components of the Carbon Marketplace platform including:
 - **Backend Services:** Spring Boot REST API, business logic, and data management
 - **Frontend Application:** Angular-based web interface for buyers, sellers, and administrators
 - **Database:** Apache Derby (development) and MySQL (production)
@@ -474,7 +474,7 @@ This document is intended for:
 
 ## 13. Conclusion
 
-This Non-Functional Requirements document establishes comprehensive quality standards, performance benchmarks, and operational constraints for the TrustLot platform. These requirements ensure that the system is not only functionally correct but also performant, reliable, secure, and maintainable.
+This Non-Functional Requirements document establishes comprehensive quality standards, performance benchmarks, and operational constraints for the Carbon Marketplace platform. These requirements ensure that the system is not only functionally correct but also performant, reliable, secure, and maintainable.
 
 ### Key Takeaways
 

@@ -1,4 +1,4 @@
-# TrustLot - Used Car Marketplace User Manual
+# Carbon Marketplace - Used Car Marketplace User Manual
 
 **Version 1.0**  
 **Date: June 2026**
@@ -22,7 +22,7 @@
 
 ## 1. Introduction
 
-Welcome to **TrustLot**, a comprehensive full-stack used car buying and selling marketplace. This manual provides complete guidance for all users—buyers, sellers, and administrators—covering registration, navigation, feature usage, and troubleshooting.
+Welcome to **Carbon Marketplace**, a comprehensive full-stack used car buying and selling marketplace. This manual provides complete guidance for all users—buyers, sellers, and administrators—covering registration, navigation, feature usage, and troubleshooting.
 
 ### Key Features:
 - **Secure Authentication** with session-based access control
@@ -39,7 +39,7 @@ Welcome to **TrustLot**, a comprehensive full-stack used car buying and selling 
 
 ### Architecture
 
-TrustLot is built on a modern full-stack architecture:
+Carbon Marketplace is built on a modern full-stack architecture:
 
 - **Backend:** Spring Boot 3.3.5, Java 17
 - **Database:** Apache Derby (file-based) or MySQL (configurable)
@@ -828,6 +828,6 @@ User Account:
 
 **Document Version:** 1.0  
 **Last Updated:** June 10, 2026  
-**Contact:** support@trustlot.com
+**Contact:** support@carbon marketplace.com
 
 For additional support, please create a support ticket through the application.

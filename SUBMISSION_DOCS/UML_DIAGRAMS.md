@@ -1,4 +1,4 @@
-# TrustLot System - UML Diagrams
+# Carbon Marketplace System - UML Diagrams
 
 ## 1. UML Class Diagram - Complete System
 
